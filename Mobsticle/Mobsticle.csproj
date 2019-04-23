@@ -98,7 +98,10 @@
     <Analyzer Include="..\packages\Microsoft.NetFramework.Analyzers.2.9.0\analyzers\dotnet\cs\Microsoft.NetFramework.Analyzers.dll" />
     <Analyzer Include="..\packages\Microsoft.NetFramework.Analyzers.2.9.0\analyzers\dotnet\cs\Microsoft.NetFramework.CSharp.Analyzers.dll" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Cock.wav" />
+    <EmbeddedResource Include="Resources\Pig.wav" />
+  </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Cow.wav" />
   </ItemGroup>
