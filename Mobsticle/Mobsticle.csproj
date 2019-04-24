@@ -105,6 +105,14 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\Cow.wav" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Cat.wav" />
+    <EmbeddedResource Include="Resources\Dog.wav" />
+    <EmbeddedResource Include="Resources\Duck.wav" />
+    <EmbeddedResource Include="Resources\Horse.wav" />
+    <EmbeddedResource Include="Resources\Owl.wav" />
+    <EmbeddedResource Include="Resources\Sheep.wav" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
