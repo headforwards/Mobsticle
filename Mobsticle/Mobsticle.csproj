@@ -59,10 +59,12 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="Interfaces\Enumerations.cs" />
-    <Compile Include="Interfaces\IMobsticle.cs" />
-    <Compile Include="Interfaces\IMobsticleSettings.cs" />
-    <Compile Include="Interfaces\IMobsticleTimer.cs" />
+    <Compile Include="Interface\Enumerations.cs" />
+    <Compile Include="Interface\IMobsticle.cs" />
+    <Compile Include="Interface\IMobsticleSettings.cs" />
+    <Compile Include="Interface\IMobsticleTimer.cs" />
+    <Compile Include="Interface\IParticipant.cs" />
+    <Compile Include="Logic\Participant.cs" />
     <Compile Include="Logic\MobsticleLogic.cs" />
     <Compile Include="Logic\MobsticleSettings.cs" />
     <Compile Include="Program.cs" />

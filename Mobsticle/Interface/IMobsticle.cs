@@ -4,15 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Mobsticle.Interfaces
+namespace Mobsticle.Interface
 {
     public interface IMobsticle
     {
         MobsticleStatus Status { get; }
+        
+        decimal PercentElapsedTime { get; }
 
-        int ElapsedTime { get; }
-
-        int TotalTime { get; }
+        IList<IParticipant> Participants { get; }
 
         void Rotate();
 
@@ -24,15 +24,6 @@ namespace Mobsticle.Interfaces
 
         event EventHandler StatusChanged;
 
-        event EventHandler TimeChanged;
-
         event EventHandler ParticipantsChanged;
-
-        event EventHandler<MobsticleNotification> Notify;
-    }
-
-    public class MobsticleNotification : EventArgs
-    {
-        public string FileName { get; set; }
     }
 }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Mobsticle.Interfaces
+namespace Mobsticle.Interface
 {
     public enum MobsticleStatus
     {
