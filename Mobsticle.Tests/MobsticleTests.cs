@@ -148,12 +148,12 @@ namespace Mobsticle.Tests
         [DataRow(50)]
         [DataRow(100)]
         [DataRow(75)]
-        public void PercentElapsedTime_ReturnsExpectedTime(int percent)
+        public void FractionElapsedTime_ReturnsExpectedTime(int percent)
         {
             _settings.Minutes.Returns(2);
             _mobsticle.Settings = _settings;
             _timer.Now.Returns(_start.AddSeconds((120d / 100 ) * percent));
-            Assert.AreEqual(percent, _mobsticle.PercentElapsedTime);
+            Assert.AreEqual(percent / 100m, _mobsticle.FractionElapsedTime);
         }
 
         [TestMethod]
@@ -217,7 +217,71 @@ namespace Mobsticle.Tests
             _timer.Now.Returns(_start.AddMinutes(2.5));
             _timer.Tick += Raise.Event();
             _mobsticle.Rotate();
-            Assert.AreEqual(0, _mobsticle.PercentElapsedTime);
+            Assert.AreEqual(0, _mobsticle.FractionElapsedTime);
+        }
+
+        [TestMethod]
+        public void TimeChanged_FiresWhenPercentChanges()
+        {
+            _settings.Minutes.Returns(200);
+            _mobsticle.Settings = _settings;
+            var called = 0;
+            _mobsticle.TimeChanged += (o, e) => called++;
+            for (int x = 1; x <= 250; x++)
+            {
+                _timer.Now.Returns(_start.AddMinutes(x));
+                _timer.Tick += Raise.Event();
+            }
+            Assert.AreEqual(100, called);
+        }
+
+        [TestMethod]
+        public void TimeChanged_ContinuesToWorkOnceRotated()
+        {
+            _settings.Minutes.Returns(10);
+            _mobsticle.Settings = _settings;
+            _timer.Now.Returns(_start.AddMinutes(9));
+            _timer.Tick += Raise.Event();
+            _timer.Now.Returns(_start.AddMinutes(11));
+            _timer.Tick += Raise.Event();
+            _mobsticle.Rotate();
+            var called = false;
+            _mobsticle.TimeChanged += (o, e) => called = true;
+            _timer.Now.Returns(_start.AddMinutes(12));
+            _timer.Tick += Raise.Event();
+            Assert.IsTrue(called);
+        }
+
+        [TestMethod]
+        public void FractionTimeElapsed_NeverReturnsMoreThan1()
+        {
+            _settings.Minutes.Returns(10);
+            _mobsticle.Settings = _settings;
+            _timer.Now.Returns(_start.AddMinutes(15));
+            Assert.AreEqual(1, _mobsticle.FractionElapsedTime);
+        }
+
+        [TestMethod]
+        public void FractionTimeElapsed_ResetsWhenRotated()
+        {
+            _settings.Minutes.Returns(5);
+            _mobsticle.Settings = _settings;
+            _timer.Now.Returns(_start.AddMinutes(6));
+            _timer.Tick += Raise.Event();
+            _mobsticle.Rotate();
+            _timer.Now.Returns(_start.AddMinutes(7));
+            Assert.IsTrue(_mobsticle.FractionElapsedTime < 1);
+        }
+
+        [TestMethod]
+        public void Rotate_TriggersTimeChangedEventImmediately()
+        {
+            _settings.Minutes.Returns(10);
+            _mobsticle.Settings = _settings;            
+            var called = false;
+            _mobsticle.TimeChanged += (o, e) => called = true;
+            _mobsticle.Rotate();
+            Assert.IsTrue(called);
         }
     }
 }

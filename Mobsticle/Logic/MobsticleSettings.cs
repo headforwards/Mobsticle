@@ -9,8 +9,8 @@ namespace Mobsticle.Logic
 {
     public class MobsticleSettings : IMobsticleSettings
     {
-        public int Minutes => throw new NotImplementedException();
+        public int Minutes { get; set; }
 
-        public IList<string> Participants => throw new NotImplementedException();
+        public IList<string> Participants { get; set; }
     }
 }

@@ -12,11 +12,12 @@ namespace Mobsticle.Logic
     {
         public MobsticleStatus Status { get; private set; } = MobsticleStatus.Paused;
 
-        public decimal PercentElapsedTime
+        public decimal FractionElapsedTime
         {
             get            
             {
-                return (decimal)((_timer.Now - _startTime).TotalMinutes / _settings.Minutes) * 100;
+                var p = (decimal)((_timer.Now - _startTime).TotalMinutes / _settings.Minutes);
+                return p > 1 ? 1m : p;
             }
         }
 
@@ -43,9 +44,11 @@ namespace Mobsticle.Logic
 
         private DateTime _startTime;
         private DateTime _pausedTime;
+        private decimal _lastPercentNotified;
 
         public event EventHandler StatusChanged;
         public event EventHandler ParticipantsChanged;
+        public event EventHandler TimeChanged;
         
         public MobsticleLogic(IMobsticleTimer timer)
         {
@@ -82,6 +85,8 @@ namespace Mobsticle.Logic
                 OnStatusChanged(this, new EventArgs());
             }
             _startTime = _timer.Now;
+            _lastPercentNotified = 0;
+            OnTimeChanged(this, new EventArgs());
         }
 
         public void Start()
@@ -109,6 +114,15 @@ namespace Mobsticle.Logic
         private void OnParticipantsChanged(object o, EventArgs e)
         {
             var evt = ParticipantsChanged;
+            if (evt != null)
+            {
+                evt.Invoke(o, e);
+            }
+        }
+
+        private void OnTimeChanged(object o, EventArgs e)
+        {
+            var evt = TimeChanged;
             if (evt != null)
             {
                 evt.Invoke(o, e);
@@ -158,7 +172,13 @@ namespace Mobsticle.Logic
 
         private void TimerTick(object source, EventArgs evt)
         {
-            if (Status == MobsticleStatus.Running && (_timer.Now - _startTime).TotalMinutes > _settings.Minutes) {
+            var percent = Math.Floor(FractionElapsedTime * 100) / 100;
+            if (Status == MobsticleStatus.Running && percent > _lastPercentNotified)
+            {
+                _lastPercentNotified = percent;
+                OnTimeChanged(this, new EventArgs());
+            }
+            if (Status == MobsticleStatus.Running && percent >= 1) {
                 Status = MobsticleStatus.Expired;
                 OnStatusChanged(this, new EventArgs());
             }

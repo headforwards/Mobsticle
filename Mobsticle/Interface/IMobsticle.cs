@@ -10,7 +10,7 @@ namespace Mobsticle.Interface
     {
         MobsticleStatus Status { get; }
         
-        decimal PercentElapsedTime { get; }
+        decimal FractionElapsedTime { get; }
 
         IList<IParticipant> Participants { get; }
 
@@ -25,5 +25,7 @@ namespace Mobsticle.Interface
         event EventHandler StatusChanged;
 
         event EventHandler ParticipantsChanged;
+
+        event EventHandler TimeChanged;
     }
 }
