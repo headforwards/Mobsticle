@@ -1,6 +1,6 @@
 ﻿namespace Mobsticle
 {
-    partial class Form1
+    partial class Main
     {
         /// <summary>
         /// Required designer variable.
@@ -158,7 +158,6 @@
             // timer
             // 
             this.timer.Interval = 500;
-            this.timer.Tick += new System.EventHandler(this.timer_Tick);
             // 
             // cboNotification
             // 

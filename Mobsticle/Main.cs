@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Mobsticle.Interface;
+using Mobsticle.Logic;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -9,7 +11,7 @@ using System.Windows.Forms;
 
 namespace Mobsticle
 {
-    public partial class Form1 : Form
+    public partial class Main : Form
     {
         private const int _sections = 24;
         const string CURRENT = " (Current)";
@@ -17,18 +19,13 @@ namespace Mobsticle
         const string PAUSE = "Pause";
         const string ROTATE = "Rotate";
         const string START = "Start";
-        private TimeSpan _elapsedTime = TimeSpan.Zero;
         private Icon[] _icons16;
         private Icon[] _icons48;
-        private bool _isPaused = false;
         private bool _okClose = false;
-        private string _participant;
-        private List<string> _participants = new List<string>();
         private SoundPlayer _player = new SoundPlayer();
+        private IMobsticle _mobsticle;
 
-        private DateTime _startFrom;
-        private TimeSpan _totalTime = TimeSpan.FromMinutes(10);
-        public Form1()
+        public Main()
         {
             InitializeComponent();
             _icons16 = createPieIcons(16, _sections);
@@ -37,42 +34,28 @@ namespace Mobsticle
             notifyIcon.Visible = true;
             Icon = _icons48[0];
             loadNotifications();
-            Start();
+
+            var t = new MobsticleTimer();
+            timer.Tick += t.OnTick;
+            _mobsticle = new MobsticleLogic(t);
+            _mobsticle.Settings = new MobsticleSettings { Minutes = 10, Participants = new List<string>() };
+            _mobsticle.StatusChanged += (o,e) => statusChanged();
+            _mobsticle.ParticipantsChanged += (o, e) => participantsChanged();
+            _mobsticle.TimeChanged += (o, e) => timeChanged();
+            timer.Start();
         }
-
-
-
 
         private void btnClose_Click(object sender, EventArgs e)
         {
             Hide();
+            var settings = new MobsticleSettings();
+            settings.Participants = split(txtParticipants.Text);
+            settings.Minutes = (int) numMinutes.Value;
+            _mobsticle.Settings = settings;
 
-            _participants = split(txtParticipants.Text);
-            _totalTime = TimeSpan.FromMinutes((int)numMinutes.Value);
-
-            for (int i = contextMenuStrip.Items.Count; i > 3; i--)
-                contextMenuStrip.Items.RemoveAt(i - 1);
-            if (_participants.Count > 0)
-                contextMenuStrip.Items.Add(new ToolStripSeparator());
-            if (!_participants.Contains(_participant))
-                _participant = _participants.FirstOrDefault();
-            foreach (var participant in _participants)
-            {
-                var item = new ToolStripMenuItem(textFor(participant));
-                item.Click += participantClick;
-                item.Tag = participant;
-                contextMenuStrip.Items.Add(item);
-            }
+            
         }
-
-        private void Buzz()
-        {
-            timer.Stop();
-            mniPause.Text = ROTATE;
-            //SystemSounds.Exclamation.Play();            
-            _player.PlayLooping();
-        }
-
+        
         private void cboNotification_SelectedValueChanged(object sender, EventArgs e)
         {
             if (cboNotification.SelectedItem != null)
@@ -133,8 +116,8 @@ namespace Mobsticle
 
         private void Form1_Shown(object sender, EventArgs e)
         {
-            txtParticipants.Text = string.Join(Environment.NewLine, _participants);
-            numMinutes.Value = (int)_totalTime.TotalMinutes;
+            txtParticipants.Text = string.Join(Environment.NewLine, _mobsticle.Participants.Select(p => p.Name));
+            numMinutes.Value = _mobsticle.Settings.Minutes;
         }
 
         private void loadNotifications()
@@ -144,7 +127,7 @@ namespace Mobsticle
             var prefix = assembly.GetName().Name + ".Resources.";
             foreach (var wav in assembly.GetManifestResourceNames().Where(name => name.EndsWith(".wav")))
             {
-                list.Add(Tuple.Create(wav, Text = wav.Substring(prefix.Length, wav.Length - (prefix.Length + 4))));
+                list.Add(Tuple.Create(wav, wav.Substring(prefix.Length, wav.Length - (prefix.Length + 4))));
             }
             list.Sort((i1, i2) => i1.Item1.CompareTo(i2.Item1));
             cboNotification.Items.AddRange(list.ToArray());
@@ -166,56 +149,58 @@ namespace Mobsticle
             switch (mniPause.Text)
             {
                 case PAUSE:
-                    Pause();
+                    _mobsticle.Pause();
                     break;
                 case START:
-                    Start();
+                    _mobsticle.Start();
                     break;
                 case ROTATE:
-                    Rotate();
+                    _mobsticle.Rotate();
                     break;
             }
+        }
+
+        private void statusChanged()
+        {
+            switch (_mobsticle.Status)
+            {
+                case MobsticleStatus.Expired:
+                    _player.PlayLooping();
+                    mniPause.Text = ROTATE;
+                    break;
+                case MobsticleStatus.Paused:
+                    mniPause.Text = START;
+                    break;
+                case MobsticleStatus.Running:
+                    _player.Stop();
+                    mniPause.Text = PAUSE;
+                    break;
+            }
+        }
+
+        private void participantsChanged()
+        {
+            for (int i = contextMenuStrip.Items.Count; i > 3; i--)
+                contextMenuStrip.Items.RemoveAt(i - 1);
+            if (_mobsticle.Participants.Count > 0)
+                contextMenuStrip.Items.Add(new ToolStripSeparator());
+            foreach (var participant in _mobsticle.Participants)
+            {
+                var item = new ToolStripMenuItem(textFor(participant));
+                contextMenuStrip.Items.Add(item);
+            }
+        }
+
+        private void timeChanged()
+        {
+            var section = (int)(_sections * _mobsticle.FractionElapsedTime);
+            notifyIcon.Icon = _icons16[section];
+            Icon = _icons48[section];
         }
 
         private void mniSettings_Click(object sender, EventArgs e)
         {
             Show();
-        }
-        private string nextParticipant()
-        {
-            return _participants[(_participants.IndexOf(_participant) + 1) % _participants.Count];
-        }
-
-        private void participantClick(object sender, EventArgs e)
-        {
-            var item = (ToolStripMenuItem)sender;
-
-        }
-
-        private void Pause()
-        {
-            var now = DateTime.Now;
-            timer.Stop();
-            mniPause.Text = START;
-            _elapsedTime += now - _startFrom;
-        }
-
-        private void Rotate()
-        {
-            _player.Stop();
-            var now = DateTime.Now;
-            mniPause.Text = PAUSE;
-            _elapsedTime = TimeSpan.Zero;
-            _startFrom = now;
-            timer.Start();
-
-            if (_participants.Count > 0)
-            {
-                contextMenuStrip.Items.Cast<ToolStripItem>().SingleOrDefault(i => (string)i.Tag == _participant).Text = _participant;
-                _participant = nextParticipant();
-                contextMenuStrip.Items.Cast<ToolStripItem>().SingleOrDefault(i => (string)i.Tag == _participant).Text = _participant + CURRENT;
-                contextMenuStrip.Items.Cast<ToolStripItem>().SingleOrDefault(i => (string)i.Tag == nextParticipant()).Text = nextParticipant() + NEXT;
-            }
         }
 
         private void setNotification(string name)
@@ -231,39 +216,13 @@ namespace Mobsticle
             return Regex.Split(input, Environment.NewLine).Select(s => s.Trim()).Where(x => !string.IsNullOrWhiteSpace(x) && Regex.IsMatch(x, "[\\w\\s\\d]{1,30}")).Distinct().ToList();
         }
 
-        private void Start()
+        private string textFor(IParticipant participant)
         {
-            var now = DateTime.Now;
-            timer.Start();
-            mniPause.Text = PAUSE;
-            _startFrom = now;
-        }
-
-        private string textFor(string participant)
-        {
-            if (_participant == participant)
-                return participant + CURRENT;
-            if (participant == nextParticipant())
-                return participant + NEXT;
-            return participant;
-        }
-
-        private void timer_Tick(object sender, EventArgs e)
-        {
-            var now = DateTime.Now;
-            _elapsedTime += now - _startFrom;
-            _startFrom = now;
-            if (_elapsedTime > _totalTime)
-                _elapsedTime = _totalTime;
-
-            var percentage = _elapsedTime.TotalMilliseconds / _totalTime.TotalMilliseconds;
-            var section = (int)(_sections * percentage);
-
-            notifyIcon.Icon = _icons16[section];
-            Icon = _icons48[section];
-
-            if (_elapsedTime >= _totalTime)
-                Buzz();
+            if (participant.IsDriving)
+                return participant.Name + CURRENT;
+            if (participant.IsDrivingNext)
+                return participant.Name + NEXT;
+            return participant.Name;
         }
     }
 }
