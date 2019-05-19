@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Mobsticle.Interface
+namespace Mobsticle.Logic.Timer
 {
     public interface IMobsticleTimer
     {

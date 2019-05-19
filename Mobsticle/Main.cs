@@ -1,5 +1,5 @@
-﻿using Mobsticle.Interface;
-using Mobsticle.Logic;
+﻿using Mobsticle.Logic.Mobsticle;
+using Mobsticle.Logic.Timer;
 using System;
 using System.Collections.Generic;
 using System.Drawing;

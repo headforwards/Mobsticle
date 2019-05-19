@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Mobsticle.Interface
+namespace Mobsticle.Logic.Mobsticle
 {
     public interface IMobsticle
     {
         MobsticleStatus Status { get; }
-        
+
         decimal FractionElapsedTime { get; }
 
         IList<IParticipant> Participants { get; }

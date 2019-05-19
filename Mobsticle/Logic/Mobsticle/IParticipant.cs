@@ -1,4 +1,4 @@
-﻿namespace Mobsticle.Interface
+﻿namespace Mobsticle.Logic.Mobsticle
 {
     public interface IParticipant
     {
@@ -6,6 +6,6 @@
 
         bool IsDriving { get; }
 
-        bool IsDrivingNext { get; }        
+        bool IsDrivingNext { get; }
     }
 }

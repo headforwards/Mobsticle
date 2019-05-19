@@ -1,11 +1,11 @@
-﻿using Mobsticle.Interface;
+﻿using Mobsticle.Logic.Timer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Mobsticle.Logic
+namespace Mobsticle.Logic.Timer
 {
     public class MobsticleTimer : IMobsticleTimer
     {

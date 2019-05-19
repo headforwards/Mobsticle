@@ -1,11 +1,11 @@
-﻿using Mobsticle.Interface;
+﻿using Mobsticle.Logic.Mobsticle;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Mobsticle.Logic
+namespace Mobsticle.Logic.Mobsticle
 {
     public class Participant : IParticipant
     {

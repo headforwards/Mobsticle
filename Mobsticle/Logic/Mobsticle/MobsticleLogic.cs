@@ -1,4 +1,4 @@
-﻿using Mobsticle.Interface;
+﻿using Mobsticle.Logic.Timer;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Mobsticle.Logic
+namespace Mobsticle.Logic.Mobsticle
 {
     public class MobsticleLogic : IMobsticle
     {
@@ -14,7 +14,7 @@ namespace Mobsticle.Logic
 
         public decimal FractionElapsedTime
         {
-            get            
+            get
             {
                 var p = (decimal)((_timer.Now - _startTime).TotalMinutes / _settings.Minutes);
                 return p > 1 ? 1m : p;
@@ -33,7 +33,8 @@ namespace Mobsticle.Logic
         }
 
         private List<Participant> _participants = new List<Participant>();
-        public IList<IParticipant> Participants {
+        public IList<IParticipant> Participants
+        {
             get
             {
                 return _participants?.Cast<IParticipant>().ToList() ?? new List<IParticipant>();
@@ -49,7 +50,7 @@ namespace Mobsticle.Logic
         public event EventHandler StatusChanged;
         public event EventHandler ParticipantsChanged;
         public event EventHandler TimeChanged;
-        
+
         public MobsticleLogic(IMobsticleTimer timer)
         {
             _timer = timer;
@@ -64,7 +65,7 @@ namespace Mobsticle.Logic
                 Status = MobsticleStatus.Paused;
                 _pausedTime = _timer.Now;
                 OnStatusChanged(this, new EventArgs());
-            }            
+            }
         }
 
         public void Rotate()
@@ -77,7 +78,8 @@ namespace Mobsticle.Logic
                 _participants[index].IsDriving = false;
                 _participants[newIndex].IsDriving = true;
                 _participants[newIndex].IsDrivingNext = false;
-                _participants[newNextIndex].IsDrivingNext = true;                
+                _participants[newNextIndex].IsDrivingNext = true;
+                OnParticipantsChanged(this, new EventArgs());
             }
             if (Status != MobsticleStatus.Running)
             {
@@ -178,7 +180,8 @@ namespace Mobsticle.Logic
                 _lastPercentNotified = percent;
                 OnTimeChanged(this, new EventArgs());
             }
-            if (Status == MobsticleStatus.Running && percent >= 1) {
+            if (Status == MobsticleStatus.Running && percent >= 1)
+            {
                 Status = MobsticleStatus.Expired;
                 OnStatusChanged(this, new EventArgs());
             }

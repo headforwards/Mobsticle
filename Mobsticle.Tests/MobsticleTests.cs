@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Mobsticle.Interface;
-using Mobsticle.Logic;
+using Mobsticle.Logic.Mobsticle;
+using Mobsticle.Logic.Timer;
 using NSubstitute;
 
 namespace Mobsticle.Tests
@@ -280,6 +280,18 @@ namespace Mobsticle.Tests
             _mobsticle.Settings = _settings;            
             var called = false;
             _mobsticle.TimeChanged += (o, e) => called = true;
+            _mobsticle.Rotate();
+            Assert.IsTrue(called);
+        }
+
+        [TestMethod]
+        public void Rotate_TriggersParticipantsChanged()
+        {
+            _settings.Minutes.Returns(10);
+            _settings.Participants.Returns(new List<string> { "Test1", "Test2", "Test3" });
+            _mobsticle.Settings = _settings;
+            var called = false;
+            _mobsticle.ParticipantsChanged += (o, e) => called = true;
             _mobsticle.Rotate();
             Assert.IsTrue(called);
         }
