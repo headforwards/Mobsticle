@@ -6,7 +6,7 @@ using Mobsticle.Logic.Mobsticle;
 using Mobsticle.Logic.Timer;
 using NSubstitute;
 
-namespace Mobsticle.Tests
+namespace Mobsticle.Tests.Logic.Mobsticle
 {
     [TestClass]
     public class MobsticleTests
@@ -60,7 +60,7 @@ namespace Mobsticle.Tests
             _mobsticle.Pause();
             var called = false;
             _mobsticle.StatusChanged += (o, e) => called = true;
-            _mobsticle.Pause();           
+            _mobsticle.Pause();
             Assert.IsFalse(called);
         }
 
@@ -126,7 +126,7 @@ namespace Mobsticle.Tests
         [TestMethod]
         public void SettingsSet_CanHandleEmptyParticipantsList()
         {
-            _settings.Participants.Returns(new List<string> ());
+            _settings.Participants.Returns(new List<string>());
             _mobsticle.Settings = _settings;
         }
 
@@ -152,7 +152,7 @@ namespace Mobsticle.Tests
         {
             _settings.Minutes.Returns(2);
             _mobsticle.Settings = _settings;
-            _timer.Now.Returns(_start.AddSeconds((120d / 100 ) * percent));
+            _timer.Now.Returns(_start.AddSeconds(120d / 100 * percent));
             Assert.AreEqual(percent / 100m, _mobsticle.FractionElapsedTime);
         }
 
@@ -166,7 +166,7 @@ namespace Mobsticle.Tests
             _timer.Now.Returns(_start.AddMinutes(4.01));
             _timer.Tick += Raise.Event();
             Assert.AreEqual(MobsticleStatus.Expired, _mobsticle.Status);
-            Assert.IsTrue(called);            
+            Assert.IsTrue(called);
         }
 
         [TestMethod]
@@ -277,7 +277,7 @@ namespace Mobsticle.Tests
         public void Rotate_TriggersTimeChangedEventImmediately()
         {
             _settings.Minutes.Returns(10);
-            _mobsticle.Settings = _settings;            
+            _mobsticle.Settings = _settings;
             var called = false;
             _mobsticle.TimeChanged += (o, e) => called = true;
             _mobsticle.Rotate();
