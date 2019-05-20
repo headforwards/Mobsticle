@@ -39,7 +39,6 @@
             this.mniSettings = new System.Windows.Forms.ToolStripMenuItem();
             this.mniPause = new System.Windows.Forms.ToolStripMenuItem();
             this.mniExit = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.timer = new System.Windows.Forms.Timer(this.components);
             this.cboNotification = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
@@ -108,7 +107,7 @@
             this.btnClose.Location = new System.Drawing.Point(152, 289);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(75, 23);
-            this.btnClose.TabIndex = 4;
+            this.btnClose.TabIndex = 5;
             this.btnClose.Text = "Close";
             this.btnClose.UseVisualStyleBackColor = true;
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
@@ -124,36 +123,30 @@
             this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mniSettings,
             this.mniPause,
-            this.mniExit,
-            this.toolStripSeparator1});
+            this.mniExit});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(117, 76);
+            this.contextMenuStrip.Size = new System.Drawing.Size(181, 92);
             // 
             // mniSettings
             // 
             this.mniSettings.Name = "mniSettings";
-            this.mniSettings.Size = new System.Drawing.Size(116, 22);
+            this.mniSettings.Size = new System.Drawing.Size(180, 22);
             this.mniSettings.Text = "Settings";
             this.mniSettings.Click += new System.EventHandler(this.mniSettings_Click);
             // 
             // mniPause
             // 
             this.mniPause.Name = "mniPause";
-            this.mniPause.Size = new System.Drawing.Size(116, 22);
+            this.mniPause.Size = new System.Drawing.Size(180, 22);
             this.mniPause.Text = "Pause";
             this.mniPause.Click += new System.EventHandler(this.mniPause_Click);
             // 
             // mniExit
             // 
             this.mniExit.Name = "mniExit";
-            this.mniExit.Size = new System.Drawing.Size(116, 22);
+            this.mniExit.Size = new System.Drawing.Size(180, 22);
             this.mniExit.Text = "Exit";
             this.mniExit.Click += new System.EventHandler(this.mniExit_Click);
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(113, 6);
             // 
             // timer
             // 
@@ -168,8 +161,7 @@
             this.cboNotification.Location = new System.Drawing.Point(16, 252);
             this.cboNotification.Name = "cboNotification";
             this.cboNotification.Size = new System.Drawing.Size(211, 21);
-            this.cboNotification.TabIndex = 5;
-            this.cboNotification.SelectedValueChanged += new System.EventHandler(this.cboNotification_SelectedValueChanged);
+            this.cboNotification.TabIndex = 4;
             // 
             // label3
             // 
@@ -181,7 +173,7 @@
             this.label3.TabIndex = 6;
             this.label3.Text = "Notification";
             // 
-            // Form1
+            // Main
             // 
             this.AcceptButton = this.btnClose;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -196,7 +188,7 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.txtParticipants);
             this.Controls.Add(this.label1);
-            this.Name = "Form1";
+            this.Name = "Main";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Mobsticle";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
@@ -220,7 +212,6 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem mniSettings;
         private System.Windows.Forms.ToolStripMenuItem mniPause;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.Timer timer;
         private System.Windows.Forms.ToolStripMenuItem mniExit;
         private System.Windows.Forms.ComboBox cboNotification;

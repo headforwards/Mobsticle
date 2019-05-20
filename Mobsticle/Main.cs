@@ -1,4 +1,5 @@
 ﻿using Mobsticle.Logic.Mobsticle;
+using Mobsticle.Logic.SettingsStore;
 using Mobsticle.Logic.Timer;
 using System;
 using System.Collections.Generic;
@@ -38,10 +39,18 @@ namespace Mobsticle
             var t = new MobsticleTimer();
             timer.Tick += t.OnTick;
             _mobsticle = new MobsticleLogic(t);
-            _mobsticle.Settings = new MobsticleSettings { Minutes = 10, Participants = new List<string>() };
             _mobsticle.StatusChanged += (o,e) => statusChanged();
             _mobsticle.ParticipantsChanged += (o, e) => participantsChanged();
             _mobsticle.TimeChanged += (o, e) => timeChanged();
+
+            var settings = new Store(new FilePersistence()).Load<MobsticleSettings>();
+            _mobsticle.Settings = settings;
+            var item = cboNotification.Items.Cast<object>().SingleOrDefault(x => ((Tuple<string, string>)x).Item1 == settings.Notification);
+            if (item != null)
+            {
+                cboNotification.SelectedIndex = cboNotification.Items.IndexOf(item);
+            }
+
             timer.Start();
         }
 
@@ -51,17 +60,14 @@ namespace Mobsticle
             var settings = new MobsticleSettings();
             settings.Participants = split(txtParticipants.Text);
             settings.Minutes = (int) numMinutes.Value;
-            _mobsticle.Settings = settings;
-
-            
-        }
-        
-        private void cboNotification_SelectedValueChanged(object sender, EventArgs e)
-        {
             if (cboNotification.SelectedItem != null)
             {
-                setNotification(((Tuple<string, string>)cboNotification.SelectedItem).Item1);
+                var notification = ((Tuple<string, string>)cboNotification.SelectedItem).Item1;
+                setNotification(notification);
+                settings.Notification = notification;
             }
+            _mobsticle.Settings = settings;
+            new Store(new FilePersistence()).Save(settings);
         }
 
         private Icon[] createPieIcons(int size, int sections)
@@ -117,7 +123,7 @@ namespace Mobsticle
         private void Form1_Shown(object sender, EventArgs e)
         {
             txtParticipants.Text = string.Join(Environment.NewLine, _mobsticle.Participants.Select(p => p.Name));
-            numMinutes.Value = _mobsticle.Settings.Minutes;
+            numMinutes.Value = _mobsticle.Settings.Minutes;            
         }
 
         private void loadNotifications()
@@ -181,13 +187,13 @@ namespace Mobsticle
         private void participantsChanged()
         {
             for (int i = contextMenuStrip.Items.Count; i > 3; i--)
-                contextMenuStrip.Items.RemoveAt(i - 1);
+                contextMenuStrip.Items.RemoveAt(0);
             if (_mobsticle.Participants.Count > 0)
-                contextMenuStrip.Items.Add(new ToolStripSeparator());
-            foreach (var participant in _mobsticle.Participants)
+                contextMenuStrip.Items.Insert(0, new ToolStripSeparator());
+            foreach (var participant in _mobsticle.Participants.Reverse())
             {
                 var item = new ToolStripMenuItem(textFor(participant));
-                contextMenuStrip.Items.Add(item);
+                contextMenuStrip.Items.Insert(0, item);
             }
         }
 

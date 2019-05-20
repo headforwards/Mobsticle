@@ -25,10 +25,11 @@ namespace Mobsticle.Tests.Logic.SettingsStore
         }
 
         [TestMethod]
-        public void Load_ReadsSettingsFromDefaultLocationWhenEmpty()
+        public void Load_ReadsDefaultSettingsFromDefaultLocationWhenEmpty()
         {
             var result = _store.Load<MobsticleSettings>();
             Assert.IsInstanceOfType(result, typeof(MobsticleSettings));
+            Assert.AreEqual(10, result.Minutes);
         }
 
         [TestMethod]

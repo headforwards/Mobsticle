@@ -9,8 +9,10 @@ namespace Mobsticle.Logic.Mobsticle
 {
     public class MobsticleSettings : IMobsticleSettings
     {
-        public int Minutes { get; set; }
+        public int Minutes { get; set; } = 10;
 
         public IList<string> Participants { get; set; }
+
+        public string Notification { get; set; }
     }
 }

@@ -142,22 +142,25 @@ namespace Mobsticle.Logic.Mobsticle
                     changed = false;
                 }
             }
-            foreach (var participant in Settings.Participants)
+            if (Settings.Participants != null)
             {
-                var existing = _participants.SingleOrDefault(x => x.Name == participant);
-                if (existing == null)
+                foreach (var participant in Settings.Participants)
                 {
-                    _participants.Add(new Participant { Name = participant });
-                    changed = true;
-                }
-                else
-                {
-                    var index = Settings.Participants.IndexOf(participant);
-                    if (index != _participants.IndexOf(existing))
+                    var existing = _participants.SingleOrDefault(x => x.Name == participant);
+                    if (existing == null)
                     {
-                        _participants.Remove(existing);
-                        _participants.Insert(index, existing);
+                        _participants.Add(new Participant { Name = participant });
                         changed = true;
+                    }
+                    else
+                    {
+                        var index = Settings.Participants.IndexOf(participant);
+                        if (index != _participants.IndexOf(existing))
+                        {
+                            _participants.Remove(existing);
+                            _participants.Insert(index, existing);
+                            changed = true;
+                        }
                     }
                 }
             }

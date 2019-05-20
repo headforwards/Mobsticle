@@ -131,6 +131,13 @@ namespace Mobsticle.Tests.Logic.Mobsticle
         }
 
         [TestMethod]
+        public void SettingsSet_CanHandleNullParticipantsList()
+        {
+            _settings.Participants.Returns((List<string>)null);
+            _mobsticle.Settings = _settings;
+        }
+
+        [TestMethod]
         public void Rotate_MovesToNextDriver()
         {
             _settings.Participants.Returns(new List<string> { "A", "B", "C" });
