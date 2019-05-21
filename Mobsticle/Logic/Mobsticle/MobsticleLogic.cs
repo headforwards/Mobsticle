@@ -139,7 +139,7 @@ namespace Mobsticle.Logic.Mobsticle
                 if (!Settings.Participants.Contains(participant.Name))
                 {
                     _participants.Remove(participant);
-                    changed = false;
+                    changed = true;
                 }
             }
             if (Settings.Participants != null)

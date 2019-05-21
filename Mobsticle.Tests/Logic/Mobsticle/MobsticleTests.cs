@@ -106,6 +106,18 @@ namespace Mobsticle.Tests.Logic.Mobsticle
         }
 
         [TestMethod]
+        public void SettingsSet_FiresIfParticipantsRemoved()
+        {
+            _settings.Participants.Returns(new List<string> { "A", "B", "C" });
+            _mobsticle.Settings = _settings;
+            var called = false;
+            _mobsticle.ParticipantsChanged += (o, e) => called = true;
+            _settings.Participants.Returns(new List<string> { "A", "B" });
+            _mobsticle.Settings = _settings;
+            Assert.IsTrue(called);
+        }
+
+        [TestMethod]
         public void SettingsSet_ChangesDriverIfExistingDriverRemoved()
         {
             _settings.Participants.Returns(new List<string> { "A", "B", "C" });

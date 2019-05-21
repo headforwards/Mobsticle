@@ -205,12 +205,17 @@ namespace Mobsticle
             for (int i = contextMenuStrip.Items.Count; i > 3; i--)
                 contextMenuStrip.Items.RemoveAt(0);
             if (_mobsticle.Participants.Count > 0)
+            {
                 contextMenuStrip.Items.Insert(0, new ToolStripSeparator());
+                var driver = _mobsticle.Participants.SingleOrDefault(p => p.IsDriving);
+                var next = _mobsticle.Participants.SingleOrDefault(p => p.IsDrivingNext);
+                notifyIcon.Text = driver != null ? next != null ? textFor(driver) + " > " + textFor(next) : textFor(driver) : "Mobsticle";
+            }
             foreach (var participant in _mobsticle.Participants.Reverse())
             {
                 var item = new ToolStripMenuItem(textFor(participant));
                 contextMenuStrip.Items.Insert(0, item);
-            }
+            }            
         }
 
         private void timeChanged()
