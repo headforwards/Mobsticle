@@ -15,6 +15,7 @@ namespace Mobsticle
     public partial class Main : Form
     {
         private const int _sections = 24;
+        private const int _pausedIcon = _sections + 1;
         const string CURRENT = " (Current)";
         const string NEXT = " (Next)";
         const string PAUSE = "Pause";
@@ -29,8 +30,8 @@ namespace Mobsticle
         public Main()
         {
             InitializeComponent();
-            _icons16 = createPieIcons(16, _sections);
-            _icons48 = createPieIcons(48, _sections);
+            _icons16 = createIcons(16, _sections);
+            _icons48 = createIcons(48, _sections);
             notifyIcon.Icon = _icons16[0];
             notifyIcon.Visible = true;
             Icon = _icons48[0];
@@ -70,7 +71,7 @@ namespace Mobsticle
             new Store(new FilePersistence()).Save(settings);
         }
 
-        private Icon[] createPieIcons(int size, int sections)
+        private Icon[] createIcons(int size, int sections)
         {
             var icons = new List<Icon>();
             using (var br = new SolidBrush(Color.IndianRed))
@@ -94,7 +95,7 @@ namespace Mobsticle
                         {
                             g.FillPie(br, new Rectangle(0, 0, size - 1, size - 1), 270, arc);
                         }
-                        var p = new GraphicsPath();
+                        //var p = new GraphicsPath();
                         //var fac = (int) (size * 0.3);
                         //p.AddEllipse(new Rectangle(fac, fac, size - (1 + fac * 2), size - (1 + fac * 2)));
                         //g.SetClip(p);
@@ -102,6 +103,19 @@ namespace Mobsticle
                         //g.ResetClip();
                         icons.Add(Icon.FromHandle(bitmap.GetHicon()));
                     }
+                }
+
+                using (var bitmap = new Bitmap(size, size))
+                using (var g = Graphics.FromImage(bitmap))
+                {
+                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                    g.FillEllipse(br, new Rectangle(0, 0, size - 1, size - 1));
+                    var o1 = (int)(size * 0.2);
+                    var o2 = (int)(size * 0.6);
+                    g.FillRectangle(bg, new Rectangle(o1, o1, o1, o2));
+                    g.FillRectangle(bg, new Rectangle(o2, o1, o1, o2));
+                    //var p = new GraphicsPath();
+                    icons.Add(Icon.FromHandle(bitmap.GetHicon()));
                 }
             }
             return icons.ToArray();
@@ -176,10 +190,12 @@ namespace Mobsticle
                     break;
                 case MobsticleStatus.Paused:
                     mniPause.Text = START;
+                    setIcon(_pausedIcon);
                     break;
                 case MobsticleStatus.Running:
                     _player.Stop();
                     mniPause.Text = PAUSE;
+                    timeChanged();
                     break;
             }
         }
@@ -200,8 +216,13 @@ namespace Mobsticle
         private void timeChanged()
         {
             var section = (int)(_sections * _mobsticle.FractionElapsedTime);
-            notifyIcon.Icon = _icons16[section];
-            Icon = _icons48[section];
+            setIcon(section);
+        }
+
+        private void setIcon(int icon)
+        {
+            notifyIcon.Icon = _icons16[icon];
+            Icon = _icons48[icon];
         }
 
         private void mniSettings_Click(object sender, EventArgs e)
