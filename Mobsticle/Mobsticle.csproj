@@ -77,6 +77,8 @@
     <Compile Include="Logic\Mobsticle\MobsticleSettings.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UserInterface\IMainWindow.cs" />
+    <Compile Include="UserInterface\MobsticleInterface.cs" />
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.cs</DependentUpon>
     </EmbeddedResource>
