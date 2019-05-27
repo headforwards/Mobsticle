@@ -27,6 +27,16 @@ namespace Mobsticle.UserInterface
             _mobsticle.StatusChanged += StatusChanged;
             _mobsticle.TimeChanged += TimeChanged;
             _mobsticle.ParticipantsChanged += ParticipantsChanged;
+
+            var settings = _store.Load<MobsticleSettings>();
+            _mobsticle.Settings = settings;
+            _mainWindow.ParticipantsList = string.Join(Environment.NewLine, settings.Participants ?? new string[] { });
+            _mainWindow.Minutes = settings.Minutes;
+            _mainWindow.Notification = settings.Notification;
+
+            _mainWindow.btnPauseVisible = true;
+            _mainWindow.btnRotateVisible = false;
+            _mainWindow.btnStartVisible = false;
         }
 
         public void btnCloseClick()
@@ -35,6 +45,7 @@ namespace Mobsticle.UserInterface
             var settings = new MobsticleSettings();
             settings.Participants = Split(_mainWindow.ParticipantsList);
             settings.Minutes = (int)_mainWindow.Minutes;
+            settings.Notification = _mainWindow.Notification;
             _mobsticle.Settings = settings;
             _store.Save(settings);
         }

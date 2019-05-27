@@ -37,7 +37,9 @@
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.mniSettings = new System.Windows.Forms.ToolStripMenuItem();
+            this.mniStart = new System.Windows.Forms.ToolStripMenuItem();
             this.mniPause = new System.Windows.Forms.ToolStripMenuItem();
+            this.mniRotate = new System.Windows.Forms.ToolStripMenuItem();
             this.mniExit = new System.Windows.Forms.ToolStripMenuItem();
             this.timer = new System.Windows.Forms.Timer(this.components);
             this.cboNotification = new System.Windows.Forms.ComboBox();
@@ -122,10 +124,12 @@
             // 
             this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mniSettings,
+            this.mniStart,
             this.mniPause,
+            this.mniRotate,
             this.mniExit});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(181, 92);
+            this.contextMenuStrip.Size = new System.Drawing.Size(181, 136);
             // 
             // mniSettings
             // 
@@ -134,12 +138,26 @@
             this.mniSettings.Text = "Settings";
             this.mniSettings.Click += new System.EventHandler(this.mniSettings_Click);
             // 
+            // mniStart
+            // 
+            this.mniStart.Name = "mniStart";
+            this.mniStart.Size = new System.Drawing.Size(180, 22);
+            this.mniStart.Text = "Start";
+            this.mniStart.Click += new System.EventHandler(this.MniStart_Click);
+            // 
             // mniPause
             // 
             this.mniPause.Name = "mniPause";
             this.mniPause.Size = new System.Drawing.Size(180, 22);
             this.mniPause.Text = "Pause";
             this.mniPause.Click += new System.EventHandler(this.mniPause_Click);
+            // 
+            // mniRotate
+            // 
+            this.mniRotate.Name = "mniRotate";
+            this.mniRotate.Size = new System.Drawing.Size(180, 22);
+            this.mniRotate.Text = "Rotate";
+            this.mniRotate.Click += new System.EventHandler(this.MniRotate_Click);
             // 
             // mniExit
             // 
@@ -191,9 +209,7 @@
             this.Name = "Main";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Mobsticle";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
-            this.Load += new System.EventHandler(this.Form1_Load);
-            this.Shown += new System.EventHandler(this.Form1_Shown);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);            
             ((System.ComponentModel.ISupportInitialize)(this.numMinutes)).EndInit();
             this.contextMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -216,6 +232,8 @@
         private System.Windows.Forms.ToolStripMenuItem mniExit;
         private System.Windows.Forms.ComboBox cboNotification;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.ToolStripMenuItem mniStart;
+        private System.Windows.Forms.ToolStripMenuItem mniRotate;
     }
 }
 

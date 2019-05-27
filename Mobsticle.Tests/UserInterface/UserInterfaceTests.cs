@@ -4,6 +4,7 @@ using Mobsticle.Logic.SettingsStore;
 using Mobsticle.UserInterface;
 using NSubstitute;
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Windows.Forms;
 
@@ -23,6 +24,7 @@ namespace Mobsticle.Tests.UserInterface
             _mainWindow = Substitute.For<IMainWindow>();
             _mobsticleLogic = Substitute.For<IMobsticle>();
             _store = Substitute.For<ISettingsStore>();
+            _store.Load<MobsticleSettings>().Returns(new MobsticleSettings());
             _interface = new MobsticleInterface(_mainWindow, _mobsticleLogic, _store);
             _mainWindow.MobsticleInterface = _interface;
         }
@@ -32,11 +34,14 @@ namespace Mobsticle.Tests.UserInterface
         {
             _mainWindow.ParticipantsList.Returns("A\r\nB");
             _mainWindow.Minutes.Returns(5);
+            _mainWindow.Notifications.Returns(new Dictionary<string, string> { { "A", "A.wav" }, { "B", "B.wav" } });
+            _mainWindow.Notification.Returns("A.wav");
 
             _interface.btnCloseClick();
 
             _mainWindow.Received().Hide();
-            Expression<Predicate<IMobsticleSettings>> checkSettings = s => s.Minutes == 5 && s.Participants[0] == "A" && s.Participants[1] == "B" && s.Participants.Count == 2;
+            Expression<Predicate<MobsticleSettings>> checkSettings = s => s.Minutes == 5 && s.Participants[0] == "A" && s.Participants[1] == "B" && s.Participants.Count == 2
+                && s.Notification == "A.wav";
             _mobsticleLogic.Received().Settings = Arg.Is(checkSettings);
             _store.Received().Save(Arg.Is(checkSettings));
         }
@@ -216,6 +221,29 @@ namespace Mobsticle.Tests.UserInterface
             _mobsticleLogic.ParticipantsChanged += Raise.Event();
 
             _mainWindow.Received().SetIconTooltip("Mobsticle");
+        }
+
+        [TestMethod]
+        public void LoadsSettingsOnConstruction()
+        {
+            _store.Load<MobsticleSettings>().Returns(new MobsticleSettings { Minutes = 7, Participants = new[] { "A", "B" }, Notification = "A.wav" });
+
+            var iface = new MobsticleInterface(_mainWindow, _mobsticleLogic, _store);
+
+            _mainWindow.Received().ParticipantsList = "A\r\nB";
+            _mainWindow.Received().Minutes = 7;
+            _mainWindow.Received().Notification = "A.wav";
+            _mobsticleLogic.Received().Settings = Arg.Is<IMobsticleSettings>(s => s.Minutes == 7 && s.Participants[0] == "A" && s.Participants[1] == "B" && s.Participants.Count == 2);
+        }
+
+        [TestMethod]
+        public void SetsUpOnConstruction()
+        {
+            new MobsticleInterface(_mainWindow, _mobsticleLogic, _store);
+
+            _mainWindow.Received().btnRotateVisible = false;
+            _mainWindow.Received().btnStartVisible = false;
+            _mainWindow.Received().btnPauseVisible = true;
         }
     }
 }

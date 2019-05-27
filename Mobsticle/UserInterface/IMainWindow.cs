@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using System.Collections.Generic;
+using System.Windows.Forms;
 
 namespace Mobsticle.UserInterface
 {
@@ -7,9 +8,11 @@ namespace Mobsticle.UserInterface
         bool btnPauseVisible { get; set; }
         bool btnRotateVisible { get; set; }
         bool btnStartVisible { get; set; }
-        decimal Minutes { get; }
+        decimal Minutes { get; set; }
         MobsticleInterface MobsticleInterface { get; set; }
-        string ParticipantsList { get; }
+        string Notification { get; set; }
+        IDictionary<string, string> Notifications { get; set; }
+        string ParticipantsList { get; set; }
         int PauseIcon { get; }
         int TimerIcons { get; }
 

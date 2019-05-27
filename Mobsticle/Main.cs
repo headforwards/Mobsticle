@@ -1,6 +1,7 @@
 ﻿using Mobsticle.Logic.Mobsticle;
 using Mobsticle.Logic.SettingsStore;
 using Mobsticle.Logic.Timer;
+using Mobsticle.UserInterface;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -12,20 +13,18 @@ using System.Windows.Forms;
 
 namespace Mobsticle
 {
-    public partial class Main : Form
+    public partial class Main : Form, IMainWindow
     {
-        private const int _sections = 24;
         private const int _pausedIcon = _sections + 1;
-        const string CURRENT = " (Current)";
-        const string NEXT = " (Next)";
-        const string PAUSE = "Pause";
-        const string ROTATE = "Rotate";
-        const string START = "Start";
+        private const int _sections = 24;
+
         private Icon[] _icons16;
+
         private Icon[] _icons48;
-        private bool _okClose = false;
+
+        private List<ToolStripItem> _participantMenuItems = new List<ToolStripItem>();
+
         private SoundPlayer _player = new SoundPlayer();
-        private IMobsticle _mobsticle;
 
         public Main()
         {
@@ -39,14 +38,13 @@ namespace Mobsticle
 
             var t = new MobsticleTimer();
             timer.Tick += t.OnTick;
-            _mobsticle = new MobsticleLogic(t);
-            _mobsticle.StatusChanged += (o,e) => statusChanged();
-            _mobsticle.ParticipantsChanged += (o, e) => participantsChanged();
-            _mobsticle.TimeChanged += (o, e) => timeChanged();
+            var mobsticle = new MobsticleLogic(t);
+            var store = new Store(new FilePersistence());
+            var _interface = new MobsticleInterface(this, mobsticle, store);
+            MobsticleInterface = _interface;
 
-            var settings = new Store(new FilePersistence()).Load<MobsticleSettings>();
-            _mobsticle.Settings = settings;
-            var item = cboNotification.Items.Cast<object>().SingleOrDefault(x => ((Tuple<string, string>)x).Item1 == settings.Notification);
+            var settings = store.Load<MobsticleSettings>();
+            var item = cboNotification.Items.Cast<object>().SingleOrDefault(x => ((KeyValuePair<string, string>)x).Value == settings.Notification);
             if (item != null)
             {
                 cboNotification.SelectedIndex = cboNotification.Items.IndexOf(item);
@@ -55,20 +53,97 @@ namespace Mobsticle
             timer.Start();
         }
 
+        public bool btnPauseVisible { get => mniPause.Visible; set => mniPause.Visible = value; }
+        public bool btnRotateVisible { get => mniRotate.Visible; set => mniRotate.Visible = value; }
+        public bool btnStartVisible { get => mniStart.Visible; set => mniStart.Visible = value; }
+
+        public decimal Minutes { get => numMinutes.Value; set => numMinutes.Value = value; }
+
+        public MobsticleInterface MobsticleInterface { get; set; }
+
+        public string Notification
+        {
+            get => ((KeyValuePair<string, string>)cboNotification.SelectedItem).Value;
+            set => cboNotification.SelectedItem = cboNotification.Items.Cast<KeyValuePair<string, string>>().SingleOrDefault(k => k.Value == value);
+        }
+
+        public IDictionary<string, string> Notifications
+        {
+            get => cboNotification.Items.Cast<KeyValuePair<string, string>>().ToDictionary(x => x.Key, x => x.Value);
+            set
+            {
+                cboNotification.Items.Clear(); foreach (var kvp in value)
+                {
+                    cboNotification.Items.Add(kvp);
+                }
+            }
+        }
+
+        public string ParticipantsList { get => txtParticipants.Text; set => txtParticipants.Text = value; }
+
+        public int PauseIcon => _pausedIcon;
+
+        public int TimerIcons => _sections;
+
+        public void AddParticipantButton(int index, string text)
+        {
+            if (_participantMenuItems.Count == 0)
+            {
+                var sep = new ToolStripSeparator();
+                _participantMenuItems.Add(sep);
+                contextMenuStrip.Items.Insert(index, sep);
+            }
+            var menuItem = new ToolStripMenuItem(text);
+            _participantMenuItems.Add(menuItem);
+            contextMenuStrip.Items.Insert(index, menuItem);
+        }
+
+        public void DisplayIcon(int icon)
+        {
+            setIcon(icon);
+        }
+
+        public void Exit()
+        {
+            Application.Exit();
+        }
+
+        public DialogResult MessageBox(string text, string title, MessageBoxButtons buttons)
+        {
+            return System.Windows.Forms.MessageBox.Show(text, title, buttons);
+        }
+
+        public void RemoveParticipantButtons()
+        {
+            foreach (var mni in _participantMenuItems)
+            {
+                contextMenuStrip.Items.Remove(mni);
+            }
+            _participantMenuItems.Clear();
+        }
+
+        public void SetIconTooltip(string text)
+        {
+            notifyIcon.Text = text;
+        }
+
+        public void StartNotification()
+        {
+            _player.PlayLooping();
+        }
+
+        public void StopNotification()
+        {
+            _player.Stop();
+        }
+
         private void btnClose_Click(object sender, EventArgs e)
         {
-            Hide();
-            var settings = new MobsticleSettings();
-            settings.Participants = split(txtParticipants.Text);
-            settings.Minutes = (int) numMinutes.Value;
             if (cboNotification.SelectedItem != null)
             {
-                var notification = ((Tuple<string, string>)cboNotification.SelectedItem).Item1;
-                setNotification(notification);
-                settings.Notification = notification;
+                setNotification(((KeyValuePair<string, string>)cboNotification.SelectedItem).Value);
             }
-            _mobsticle.Settings = settings;
-            new Store(new FilePersistence()).Save(settings);
+            MobsticleInterface.btnCloseClick();
         }
 
         private Icon[] createIcons(int size, int sections)
@@ -123,116 +198,54 @@ namespace Mobsticle
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (!_okClose)
-            {
-                e.Cancel = true;
-                Hide();
-            }
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-        }
-
-        private void Form1_Shown(object sender, EventArgs e)
-        {
-            txtParticipants.Text = string.Join(Environment.NewLine, _mobsticle.Participants.Select(p => p.Name));
-            numMinutes.Value = _mobsticle.Settings.Minutes;            
+            MobsticleInterface.formClosing(sender, e);
         }
 
         private void loadNotifications()
         {
-            var list = new List<Tuple<string, string>>();
+            var list = new List<KeyValuePair<string, string>>();
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
             var prefix = assembly.GetName().Name + ".Resources.";
             foreach (var wav in assembly.GetManifestResourceNames().Where(name => name.EndsWith(".wav")))
             {
-                list.Add(Tuple.Create(wav, wav.Substring(prefix.Length, wav.Length - (prefix.Length + 4))));
+                list.Add(new KeyValuePair<string, string>(wav.Substring(prefix.Length, wav.Length - (prefix.Length + 4)), wav));
             }
-            list.Sort((i1, i2) => i1.Item1.CompareTo(i2.Item1));
-            cboNotification.Items.AddRange(list.ToArray());
-            cboNotification.ValueMember = "Item1";
-            cboNotification.DisplayMember = "Item2";
+            list.Sort((i1, i2) => i1.Key.CompareTo(i2.Key));
+            cboNotification.Items.AddRange(list.Cast<object>().ToArray());
+            cboNotification.ValueMember = "Value";
+            cboNotification.DisplayMember = "Key";
         }
 
         private void mniExit_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("Are you sure you want to exit?", "Mobsticle", MessageBoxButtons.YesNo) == DialogResult.Yes)
-            {
-                _okClose = true;
-                Application.Exit();
-            }
+            MobsticleInterface.menuClose();
         }
 
         private void mniPause_Click(object sender, EventArgs e)
         {
-            switch (mniPause.Text)
-            {
-                case PAUSE:
-                    _mobsticle.Pause();
-                    break;
-                case START:
-                    _mobsticle.Start();
-                    break;
-                case ROTATE:
-                    _mobsticle.Rotate();
-                    break;
-            }
+            MobsticleInterface.btnPauseClick();
         }
 
-        private void statusChanged()
+        private void MniRotate_Click(object sender, EventArgs e)
         {
-            switch (_mobsticle.Status)
-            {
-                case MobsticleStatus.Expired:
-                    _player.PlayLooping();
-                    mniPause.Text = ROTATE;
-                    break;
-                case MobsticleStatus.Paused:
-                    mniPause.Text = START;
-                    setIcon(_pausedIcon);
-                    break;
-                case MobsticleStatus.Running:
-                    _player.Stop();
-                    mniPause.Text = PAUSE;
-                    timeChanged();
-                    break;
-            }
+            MobsticleInterface.btnRotateClick();
         }
 
-        private void participantsChanged()
+        private void mniSettings_Click(object sender, EventArgs e)
         {
-            for (int i = contextMenuStrip.Items.Count; i > 3; i--)
-                contextMenuStrip.Items.RemoveAt(0);
-            if (_mobsticle.Participants.Count > 0)
-            {
-                contextMenuStrip.Items.Insert(0, new ToolStripSeparator());
-                var driver = _mobsticle.Participants.SingleOrDefault(p => p.IsDriving);
-                var next = _mobsticle.Participants.SingleOrDefault(p => p.IsDrivingNext);
-                notifyIcon.Text = driver != null ? next != null ? textFor(driver) + " > " + textFor(next) : textFor(driver) : "Mobsticle";
-            }
-            foreach (var participant in _mobsticle.Participants.Reverse())
-            {
-                var item = new ToolStripMenuItem(textFor(participant));
-                contextMenuStrip.Items.Insert(0, item);
-            }            
+            //Show();
+            MobsticleInterface.btnSettingsClick();
         }
 
-        private void timeChanged()
+        private void MniStart_Click(object sender, EventArgs e)
         {
-            var section = (int)(_sections * _mobsticle.FractionElapsedTime);
-            setIcon(section);
+            MobsticleInterface.btnStartClick();
         }
 
         private void setIcon(int icon)
         {
             notifyIcon.Icon = _icons16[icon];
             Icon = _icons48[icon];
-        }
-
-        private void mniSettings_Click(object sender, EventArgs e)
-        {
-            Show();
         }
 
         private void setNotification(string name)
@@ -242,19 +255,6 @@ namespace Mobsticle
                 var assembly = System.Reflection.Assembly.GetExecutingAssembly();
                 _player.Stream = assembly.GetManifestResourceStream(name);
             }
-        }
-        private List<string> split(string input)
-        {
-            return Regex.Split(input, Environment.NewLine).Select(s => s.Trim()).Where(x => !string.IsNullOrWhiteSpace(x) && Regex.IsMatch(x, "[\\w\\s\\d]{1,30}")).Distinct().ToList();
-        }
-
-        private string textFor(IParticipant participant)
-        {
-            if (participant.IsDriving)
-                return participant.Name + CURRENT;
-            if (participant.IsDrivingNext)
-                return participant.Name + NEXT;
-            return participant.Name;
         }
     }
 }
