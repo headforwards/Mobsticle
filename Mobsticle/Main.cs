@@ -96,6 +96,7 @@ namespace Mobsticle
             var menuItem = new ToolStripMenuItem(text);
             _participantMenuItems.Add(menuItem);
             contextMenuStrip.Items.Insert(index, menuItem);
+            menuItem.Click += (o, e) => MobsticleInterface.btnParticipantClick(index);
         }
 
         public void DisplayIcon(int icon)
@@ -151,9 +152,6 @@ namespace Mobsticle
             var icons = new List<Icon>();
             using (var br = new SolidBrush(Color.IndianRed))
             using (var bg = new SolidBrush(Color.PaleGreen))
-            //using (var br = new SolidBrush(Color.FromArgb(255, 255, 100, 100)))
-            //using (var bg = new SolidBrush(Color.FromArgb(200, 200, 255, 255)))
-            //using (var bb = new SolidBrush(Color.DarkGray))
             {
                 for (int i = 0; i <= _sections; i++)
                 {
@@ -170,12 +168,6 @@ namespace Mobsticle
                         {
                             g.FillPie(br, new Rectangle(0, 0, size - 1, size - 1), 270, arc);
                         }
-                        //var p = new GraphicsPath();
-                        //var fac = (int) (size * 0.3);
-                        //p.AddEllipse(new Rectangle(fac, fac, size - (1 + fac * 2), size - (1 + fac * 2)));
-                        //g.SetClip(p);
-                        //g.Clear(Color.Transparent);
-                        //g.ResetClip();
                         icons.Add(Icon.FromHandle(bitmap.GetHicon()));
                     }
                 }
@@ -189,7 +181,6 @@ namespace Mobsticle
                     var o2 = (int)(size * 0.6);
                     g.FillRectangle(bg, new Rectangle(o1, o1, o1, o2));
                     g.FillRectangle(bg, new Rectangle(o2, o1, o1, o2));
-                    //var p = new GraphicsPath();
                     icons.Add(Icon.FromHandle(bitmap.GetHicon()));
                 }
             }

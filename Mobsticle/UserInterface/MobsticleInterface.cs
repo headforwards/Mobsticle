@@ -50,6 +50,11 @@ namespace Mobsticle.UserInterface
             _store.Save(settings);
         }
 
+        public void btnParticipantClick(int index)
+        {
+            _mobsticle.Rotate(index);
+        }
+
         public void btnPauseClick()
         {
             _mobsticle.Pause();

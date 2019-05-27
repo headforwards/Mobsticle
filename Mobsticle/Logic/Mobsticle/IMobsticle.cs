@@ -16,6 +16,8 @@ namespace Mobsticle.Logic.Mobsticle
 
         void Rotate();
 
+        void Rotate(int driver);
+
         void Pause();
 
         void Start();

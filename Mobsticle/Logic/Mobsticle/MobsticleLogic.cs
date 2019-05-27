@@ -10,7 +10,25 @@ namespace Mobsticle.Logic.Mobsticle
 {
     public class MobsticleLogic : IMobsticle
     {
-        public MobsticleStatus Status { get; private set; } = MobsticleStatus.Paused;
+        private decimal _lastPercentNotified;
+        private List<Participant> _participants = new List<Participant>();
+        private DateTime _pausedTime;
+        private IMobsticleSettings _settings;
+        private DateTime _startTime;
+        private IMobsticleTimer _timer;
+
+        public MobsticleLogic(IMobsticleTimer timer)
+        {
+            _timer = timer;
+            _timer.Tick += TimerTick;
+            Start();
+        }
+
+        public event EventHandler ParticipantsChanged;
+
+        public event EventHandler StatusChanged;
+
+        public event EventHandler TimeChanged;
 
         public decimal FractionElapsedTime
         {
@@ -21,7 +39,14 @@ namespace Mobsticle.Logic.Mobsticle
             }
         }
 
-        private IMobsticleSettings _settings;
+        public IList<IParticipant> Participants
+        {
+            get
+            {
+                return _participants?.Cast<IParticipant>().ToList() ?? new List<IParticipant>();
+            }
+        }
+
         public IMobsticleSettings Settings
         {
             get => _settings;
@@ -32,31 +57,7 @@ namespace Mobsticle.Logic.Mobsticle
             }
         }
 
-        private List<Participant> _participants = new List<Participant>();
-        public IList<IParticipant> Participants
-        {
-            get
-            {
-                return _participants?.Cast<IParticipant>().ToList() ?? new List<IParticipant>();
-            }
-        }
-
-        private IMobsticleTimer _timer;
-
-        private DateTime _startTime;
-        private DateTime _pausedTime;
-        private decimal _lastPercentNotified;
-
-        public event EventHandler StatusChanged;
-        public event EventHandler ParticipantsChanged;
-        public event EventHandler TimeChanged;
-
-        public MobsticleLogic(IMobsticleTimer timer)
-        {
-            _timer = timer;
-            _timer.Tick += TimerTick;
-            Start();
-        }
+        public MobsticleStatus Status { get; private set; } = MobsticleStatus.Paused;
 
         public void Pause()
         {
@@ -70,15 +71,26 @@ namespace Mobsticle.Logic.Mobsticle
 
         public void Rotate()
         {
+            RotateImpl();
+        }
+
+        public void Rotate(int newIndex)
+        {
+            RotateImpl(newIndex);
+        }
+
+        private void RotateImpl(int? newIndex = null)
+        {
             if (_participants.Count > 0)
             {
-                var index = _participants.IndexOf(_participants.Single(x => x.IsDriving));
-                var newIndex = index < _participants.Count - 1 ? index + 1 : 0;
-                var newNextIndex = newIndex < _participants.Count - 1 ? newIndex + 1 : 0;
-                _participants[index].IsDriving = false;
-                _participants[newIndex].IsDriving = true;
-                _participants[newIndex].IsDrivingNext = false;
-                _participants[newNextIndex].IsDrivingNext = true;
+                var i = _participants.IndexOf(_participants.Single(x => x.IsDriving));
+                var n = _participants.IndexOf(_participants.Single(x => x.IsDrivingNext));
+                var ni = newIndex ?? (i < _participants.Count - 1 ? i + 1 : 0);
+                var nni = ni < _participants.Count - 1 ? ni + 1 : 0;
+                _participants[i].IsDriving = false;
+                _participants[n].IsDrivingNext = false;
+                _participants[ni].IsDriving = true;
+                _participants[nni].IsDrivingNext = true;
                 OnParticipantsChanged(this, new EventArgs());
             }
             if (Status != MobsticleStatus.Running)
@@ -104,18 +116,18 @@ namespace Mobsticle.Logic.Mobsticle
             }
         }
 
-        private void OnStatusChanged(object o, EventArgs e)
+        private void OnParticipantsChanged(object o, EventArgs e)
         {
-            var evt = StatusChanged;
+            var evt = ParticipantsChanged;
             if (evt != null)
             {
                 evt.Invoke(o, e);
             }
         }
 
-        private void OnParticipantsChanged(object o, EventArgs e)
+        private void OnStatusChanged(object o, EventArgs e)
         {
-            var evt = ParticipantsChanged;
+            var evt = StatusChanged;
             if (evt != null)
             {
                 evt.Invoke(o, e);
@@ -128,6 +140,21 @@ namespace Mobsticle.Logic.Mobsticle
             if (evt != null)
             {
                 evt.Invoke(o, e);
+            }
+        }
+
+        private void TimerTick(object source, EventArgs evt)
+        {
+            var percent = Math.Floor(FractionElapsedTime * 100) / 100;
+            if (Status == MobsticleStatus.Running && percent > _lastPercentNotified)
+            {
+                _lastPercentNotified = percent;
+                OnTimeChanged(this, new EventArgs());
+            }
+            if (Status == MobsticleStatus.Running && percent >= 1)
+            {
+                Status = MobsticleStatus.Expired;
+                OnStatusChanged(this, new EventArgs());
             }
         }
 
@@ -173,21 +200,6 @@ namespace Mobsticle.Logic.Mobsticle
             }
             if (changed)
                 OnParticipantsChanged(this, new EventArgs());
-        }
-
-        private void TimerTick(object source, EventArgs evt)
-        {
-            var percent = Math.Floor(FractionElapsedTime * 100) / 100;
-            if (Status == MobsticleStatus.Running && percent > _lastPercentNotified)
-            {
-                _lastPercentNotified = percent;
-                OnTimeChanged(this, new EventArgs());
-            }
-            if (Status == MobsticleStatus.Running && percent >= 1)
-            {
-                Status = MobsticleStatus.Expired;
-                OnStatusChanged(this, new EventArgs());
-            }
         }
     }
 }

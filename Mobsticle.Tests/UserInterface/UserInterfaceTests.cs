@@ -13,21 +13,10 @@ namespace Mobsticle.Tests.UserInterface
     [TestClass]
     public class UserInterfaceTests
     {
+        private MobsticleInterface _interface;
         private IMainWindow _mainWindow;
         private IMobsticle _mobsticleLogic;
         private ISettingsStore _store;
-        private MobsticleInterface _interface;
-
-        [TestInitialize]
-        public void Setup()
-        {
-            _mainWindow = Substitute.For<IMainWindow>();
-            _mobsticleLogic = Substitute.For<IMobsticle>();
-            _store = Substitute.For<ISettingsStore>();
-            _store.Load<MobsticleSettings>().Returns(new MobsticleSettings());
-            _interface = new MobsticleInterface(_mainWindow, _mobsticleLogic, _store);
-            _mainWindow.MobsticleInterface = _interface;
-        }
 
         [TestMethod]
         public void btnCloseClick_HidesWindowAndSavesSettings()
@@ -57,15 +46,38 @@ namespace Mobsticle.Tests.UserInterface
         }
 
         [TestMethod]
-        public void formClosing_HidesAndCancels()
+        public void btnParticipant_RotatesParticipant()
         {
-            object sender = null;
-            var e = new FormClosingEventArgs(CloseReason.UserClosing, false);
+            _interface.btnParticipantClick(4);
+            _mobsticleLogic.Received().Rotate(4);
+        }
 
-            _interface.formClosing(sender, e);
+        [TestMethod]
+        public void btnPause_PausesTimer()
+        {
+            _interface.btnPauseClick();
+            _mobsticleLogic.Received().Pause();
+        }
 
-            _mainWindow.Received().Hide();
-            Assert.IsTrue(e.Cancel);
+        [TestMethod]
+        public void btnRotate_RotatesTimer()
+        {
+            _interface.btnRotateClick();
+            _mobsticleLogic.Received().Rotate();
+        }
+
+        [TestMethod]
+        public void btnSettingsClick_ShowsWindow()
+        {
+            _interface.btnSettingsClick();
+            _mainWindow.Received().Show();
+        }
+
+        [TestMethod]
+        public void btnStart_StartsTimer()
+        {
+            _interface.btnStartClick();
+            _mobsticleLogic.Received().Start();
         }
 
         [TestMethod]
@@ -88,98 +100,28 @@ namespace Mobsticle.Tests.UserInterface
         }
 
         [TestMethod]
-        public void btnPause_PausesTimer()
+        public void formClosing_HidesAndCancels()
         {
-            _interface.btnPauseClick();
-            _mobsticleLogic.Received().Pause();
+            object sender = null;
+            var e = new FormClosingEventArgs(CloseReason.UserClosing, false);
+
+            _interface.formClosing(sender, e);
+
+            _mainWindow.Received().Hide();
+            Assert.IsTrue(e.Cancel);
         }
 
         [TestMethod]
-        public void btnRotate_RotatesTimer()
+        public void LoadsSettingsOnConstruction()
         {
-            _interface.btnRotateClick();
-            _mobsticleLogic.Received().Rotate();
-        }
+            _store.Load<MobsticleSettings>().Returns(new MobsticleSettings { Minutes = 7, Participants = new[] { "A", "B" }, Notification = "A.wav" });
 
-        [TestMethod]
-        public void btnStart_StartsTimer()
-        {
-            _interface.btnStartClick();
-            _mobsticleLogic.Received().Start();
-        }
+            var iface = new MobsticleInterface(_mainWindow, _mobsticleLogic, _store);
 
-        [TestMethod]
-        [DataRow(MobsticleStatus.Expired)]
-        [DataRow(MobsticleStatus.Running)]
-        [DataRow(MobsticleStatus.Paused)]
-        public void StatusChanged_StartsNotificationAndMakesButtonsVisible(MobsticleStatus status)
-        {
-            _mobsticleLogic.Status.Returns(status);
-
-            _mobsticleLogic.StatusChanged += Raise.Event();
-
-            _mainWindow.Received().btnRotateVisible = status == MobsticleStatus.Expired;
-            _mainWindow.Received().btnPauseVisible = status == MobsticleStatus.Running;
-            _mainWindow.Received().btnStartVisible = status == MobsticleStatus.Paused;
-        }
-
-        [TestMethod]
-        public void StatusChanged_Expired_StartsNotification()
-        {
-            _mobsticleLogic.Status.Returns(MobsticleStatus.Expired);
-
-            _mobsticleLogic.StatusChanged += Raise.Event();
-
-            _mainWindow.Received().StartNotification();
-        }
-
-        [TestMethod]
-        public void StatusChanged_Running_StopsNotification()
-        {
-            _mainWindow.TimerIcons.Returns(24);
-            _mobsticleLogic.FractionElapsedTime.Returns(0.5m);
-            _mobsticleLogic.Status.Returns(MobsticleStatus.Running);
-
-            _mobsticleLogic.StatusChanged += Raise.Event();
-
-            _mainWindow.Received().StopNotification();
-            _mainWindow.Received().DisplayIcon((int)(24 * 0.5));
-        }
-
-        [TestMethod]
-        public void StatusChanged_Paused_StartsPausedNotification()
-        {
-            _mainWindow.PauseIcon.Returns(50);
-            _mobsticleLogic.Status.Returns(MobsticleStatus.Paused);
-
-            _mobsticleLogic.StatusChanged += Raise.Event();
-
-            _mainWindow.Received().DisplayIcon(50);
-        }
-
-        [TestMethod]
-        [DataRow(0d)]
-        [DataRow(0.5)]
-        [DataRow(0.75)]
-        [DataRow(1d)]
-        public void TimeChanged_DisplaysTimerIcon(double fraction)
-        {
-            var fr = (decimal)fraction;
-
-            _mainWindow.TimerIcons.Returns(24);
-
-            _mobsticleLogic.FractionElapsedTime.Returns(fr);
-
-            _mobsticleLogic.TimeChanged += Raise.Event();
-
-            _mainWindow.Received().DisplayIcon((int)(24 * fraction));
-        }
-
-        [TestMethod]
-        public void btnSettingsClick_ShowsWindow()
-        {
-            _interface.btnSettingsClick();
-            _mainWindow.Received().Show();
+            _mainWindow.Received().ParticipantsList = "A\r\nB";
+            _mainWindow.Received().Minutes = 7;
+            _mainWindow.Received().Notification = "A.wav";
+            _mobsticleLogic.Received().Settings = Arg.Is<IMobsticleSettings>(s => s.Minutes == 7 && s.Participants[0] == "A" && s.Participants[1] == "B" && s.Participants.Count == 2);
         }
 
         [TestMethod]
@@ -224,19 +166,6 @@ namespace Mobsticle.Tests.UserInterface
         }
 
         [TestMethod]
-        public void LoadsSettingsOnConstruction()
-        {
-            _store.Load<MobsticleSettings>().Returns(new MobsticleSettings { Minutes = 7, Participants = new[] { "A", "B" }, Notification = "A.wav" });
-
-            var iface = new MobsticleInterface(_mainWindow, _mobsticleLogic, _store);
-
-            _mainWindow.Received().ParticipantsList = "A\r\nB";
-            _mainWindow.Received().Minutes = 7;
-            _mainWindow.Received().Notification = "A.wav";
-            _mobsticleLogic.Received().Settings = Arg.Is<IMobsticleSettings>(s => s.Minutes == 7 && s.Participants[0] == "A" && s.Participants[1] == "B" && s.Participants.Count == 2);
-        }
-
-        [TestMethod]
         public void SetsUpOnConstruction()
         {
             new MobsticleInterface(_mainWindow, _mobsticleLogic, _store);
@@ -244,6 +173,84 @@ namespace Mobsticle.Tests.UserInterface
             _mainWindow.Received().btnRotateVisible = false;
             _mainWindow.Received().btnStartVisible = false;
             _mainWindow.Received().btnPauseVisible = true;
+        }
+
+        [TestInitialize]
+        public void Setup()
+        {
+            _mainWindow = Substitute.For<IMainWindow>();
+            _mobsticleLogic = Substitute.For<IMobsticle>();
+            _store = Substitute.For<ISettingsStore>();
+            _store.Load<MobsticleSettings>().Returns(new MobsticleSettings());
+            _interface = new MobsticleInterface(_mainWindow, _mobsticleLogic, _store);
+            _mainWindow.MobsticleInterface = _interface;
+        }
+
+        [TestMethod]
+        public void StatusChanged_Expired_StartsNotification()
+        {
+            _mobsticleLogic.Status.Returns(MobsticleStatus.Expired);
+
+            _mobsticleLogic.StatusChanged += Raise.Event();
+
+            _mainWindow.Received().StartNotification();
+        }
+
+        [TestMethod]
+        public void StatusChanged_Paused_StartsPausedNotification()
+        {
+            _mainWindow.PauseIcon.Returns(50);
+            _mobsticleLogic.Status.Returns(MobsticleStatus.Paused);
+
+            _mobsticleLogic.StatusChanged += Raise.Event();
+
+            _mainWindow.Received().DisplayIcon(50);
+        }
+
+        [TestMethod]
+        public void StatusChanged_Running_StopsNotification()
+        {
+            _mainWindow.TimerIcons.Returns(24);
+            _mobsticleLogic.FractionElapsedTime.Returns(0.5m);
+            _mobsticleLogic.Status.Returns(MobsticleStatus.Running);
+
+            _mobsticleLogic.StatusChanged += Raise.Event();
+
+            _mainWindow.Received().StopNotification();
+            _mainWindow.Received().DisplayIcon((int)(24 * 0.5));
+        }
+
+        [TestMethod]
+        [DataRow(MobsticleStatus.Expired)]
+        [DataRow(MobsticleStatus.Running)]
+        [DataRow(MobsticleStatus.Paused)]
+        public void StatusChanged_StartsNotificationAndMakesButtonsVisible(MobsticleStatus status)
+        {
+            _mobsticleLogic.Status.Returns(status);
+
+            _mobsticleLogic.StatusChanged += Raise.Event();
+
+            _mainWindow.Received().btnRotateVisible = status == MobsticleStatus.Expired;
+            _mainWindow.Received().btnPauseVisible = status == MobsticleStatus.Running;
+            _mainWindow.Received().btnStartVisible = status == MobsticleStatus.Paused;
+        }
+
+        [TestMethod]
+        [DataRow(0d)]
+        [DataRow(0.5)]
+        [DataRow(0.75)]
+        [DataRow(1d)]
+        public void TimeChanged_DisplaysTimerIcon(double fraction)
+        {
+            var fr = (decimal)fraction;
+
+            _mainWindow.TimerIcons.Returns(24);
+
+            _mobsticleLogic.FractionElapsedTime.Returns(fr);
+
+            _mobsticleLogic.TimeChanged += Raise.Event();
+
+            _mainWindow.Received().DisplayIcon((int)(24 * fraction));
         }
     }
 }
