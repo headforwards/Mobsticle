@@ -233,6 +233,16 @@ namespace Mobsticle.Tests.Logic.Mobsticle
         }
 
         [TestMethod]
+        public void SettingsSet_InsertsParticipantInCorrectPlace()
+        {
+            _settings.Participants.Returns(new List<string> { "A", "B", "C" });
+            _mobsticle.Settings = _settings;
+            _settings.Participants.Returns(new List<string> { "R", "A", "B", "C" });
+            _mobsticle.Settings = _settings;
+            Assert.AreEqual("R", _mobsticle.Participants[0].Name);
+        }
+
+        [TestMethod]
         public void SettingsSet_SetsNextDriver()
         {
             _settings.Participants.Returns(new List<string> { "A", "B", "C" });

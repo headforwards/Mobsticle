@@ -174,14 +174,14 @@ namespace Mobsticle.Logic.Mobsticle
                 foreach (var participant in Settings.Participants)
                 {
                     var existing = _participants.SingleOrDefault(x => x.Name == participant);
+                    var index = Settings.Participants.IndexOf(participant);
                     if (existing == null)
                     {
-                        _participants.Add(new Participant { Name = participant });
+                        _participants.Insert(index, new Participant { Name = participant });
                         changed = true;
                     }
                     else
                     {
-                        var index = Settings.Participants.IndexOf(participant);
                         if (index != _participants.IndexOf(existing))
                         {
                             _participants.Remove(existing);
