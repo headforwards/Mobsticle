@@ -289,5 +289,16 @@ namespace Mobsticle.Tests.UserInterface
 
             _mobsticleLogic.Received().Start();
         }
+
+        [TestMethod]
+        public void btnIconDoubleClick_ShowsMainWindowAndChangesStatus()
+        {
+            _mobsticleLogic.Status.Returns(MobsticleStatus.Running);
+
+            _interface.btnIconDoubleClick();
+
+            _mainWindow.Received().Show();
+            _mobsticleLogic.Received().Pause();
+        }
     }
 }

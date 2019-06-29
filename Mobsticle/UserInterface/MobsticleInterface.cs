@@ -91,6 +91,12 @@ namespace Mobsticle.UserInterface
                 _mobsticle.Start();
         }
 
+        public void btnIconDoubleClick()
+        {
+            btnIconClick();
+            _mainWindow.Show();
+        }
+
         public void formClosing(object sender, FormClosingEventArgs e)
         {
             if (!_okClose)

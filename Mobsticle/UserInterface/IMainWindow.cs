@@ -31,9 +31,5 @@ namespace Mobsticle.UserInterface
         void SetIconTooltip(string text);
 
         void Show();
-
-        //void StartNotification();
-
-        //void StopNotification();
     }
 }

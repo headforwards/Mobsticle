@@ -201,10 +201,16 @@ namespace Mobsticle
             Icon = _icons48[icon];
         }
 
-        private void NotifyIcon_Click(object sender, EventArgs e)
+        private void NotifyIcon_Click(object sender, MouseEventArgs e)
         {
-            if (e is MouseEventArgs && ((MouseEventArgs)e).Button == MouseButtons.Left)
+            if (e.Button == MouseButtons.Left)
                 MobsticleInterface.btnIconClick();
+        }
+
+        private void NotifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+                MobsticleInterface.btnIconDoubleClick();
         }
     }
 }
