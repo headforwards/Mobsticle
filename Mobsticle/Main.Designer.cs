@@ -119,6 +119,7 @@
             this.notifyIcon.ContextMenuStrip = this.contextMenuStrip;
             this.notifyIcon.Text = "Mobsticle";
             this.notifyIcon.Visible = true;
+            this.notifyIcon.Click += new System.EventHandler(this.NotifyIcon_Click);
             // 
             // contextMenuStrip
             // 

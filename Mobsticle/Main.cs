@@ -199,5 +199,11 @@ namespace Mobsticle
             notifyIcon.Icon = _icons16[icon];
             Icon = _icons48[icon];
         }
+
+        private void NotifyIcon_Click(object sender, EventArgs e)
+        {
+            if (e is MouseEventArgs && ((MouseEventArgs)e).Button == MouseButtons.Left)
+                MobsticleInterface.btnIconClick();
+        }
     }
 }

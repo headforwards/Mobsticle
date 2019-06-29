@@ -36,6 +36,7 @@ namespace Mobsticle.UserInterface
             _mainWindow.ParticipantsList = string.Join(Environment.NewLine, settings.Participants ?? new string[] { });
             _mainWindow.Minutes = settings.Minutes;
             _mainWindow.Notifications = _soundNotifier.Notifications;
+            _mainWindow.Notification = settings.Notification;
             _soundNotifier.Notification = settings.Notification;
 
             _mainWindow.btnPauseVisible = true;
@@ -78,6 +79,16 @@ namespace Mobsticle.UserInterface
         public void btnStartClick()
         {
             _mobsticle.Start();
+        }
+
+        public void btnIconClick()
+        {
+            if (_mobsticle.Status == MobsticleStatus.Expired)
+                _mobsticle.Rotate();
+            else if (_mobsticle.Status == MobsticleStatus.Running)
+                _mobsticle.Pause();
+            else
+                _mobsticle.Start();
         }
 
         public void formClosing(object sender, FormClosingEventArgs e)

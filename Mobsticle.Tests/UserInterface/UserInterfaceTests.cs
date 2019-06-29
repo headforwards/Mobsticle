@@ -124,9 +124,10 @@ namespace Mobsticle.Tests.UserInterface
 
             _mainWindow.Received().ParticipantsList = "A\r\nB";
             _mainWindow.Received().Minutes = 7;
+            _mainWindow.Received().Notifications = ndict;
+            _mainWindow.Received().Notification = "A.wav";
             _soundNotifier.Received().Notification = "A.wav";
             _mobsticleLogic.Received().Settings = Arg.Is<IMobsticleSettings>(s => s.Minutes == 7 && s.Participants[0] == "A" && s.Participants[1] == "B" && s.Participants.Count == 2);
-            _mainWindow.Received().Notifications = ndict;
         }
 
         [TestMethod]
@@ -257,6 +258,36 @@ namespace Mobsticle.Tests.UserInterface
             _mobsticleLogic.TimeChanged += Raise.Event();
 
             _mainWindow.Received().DisplayIcon((int)(24 * fraction));
+        }
+
+        [TestMethod]
+        public void btnIconClick_RotatesIfExpired()
+        {
+            _mobsticleLogic.Status.Returns(MobsticleStatus.Expired);
+
+            _interface.btnIconClick();
+
+            _mobsticleLogic.Received().Rotate();
+        }
+
+        [TestMethod]
+        public void btnIconClick_PausesIfRunning()
+        {
+            _mobsticleLogic.Status.Returns(MobsticleStatus.Running);
+
+            _interface.btnIconClick();
+
+            _mobsticleLogic.Received().Pause();
+        }
+
+        [TestMethod]
+        public void btnIconClick_StartsIfPaused()
+        {
+            _mobsticleLogic.Status.Returns(MobsticleStatus.Paused);
+
+            _interface.btnIconClick();
+
+            _mobsticleLogic.Received().Start();
         }
     }
 }
