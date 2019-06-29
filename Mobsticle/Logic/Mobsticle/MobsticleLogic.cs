@@ -194,9 +194,13 @@ namespace Mobsticle.Logic.Mobsticle
             if (!_participants.Any(x => x.IsDriving))
             {
                 if (_participants.Count > 0)
+                {
                     _participants[0].IsDriving = true;
-                if (_participants.Count > 1)
-                    _participants[1].IsDrivingNext = true;
+                    if (_participants.Count > 1)
+                        _participants[1].IsDrivingNext = true;
+                    else
+                        _participants[0].IsDrivingNext = true;
+                }
             }
             if (changed)
                 OnParticipantsChanged(this, new EventArgs());

@@ -10,7 +10,7 @@ namespace Mobsticle.Logic.SettingsStore
 {
     public class Store : ISettingsStore
     {
-        IPersistence _persistence;
+        private IPersistence _persistence;
 
         public Store(IPersistence persistence)
         {
@@ -26,7 +26,7 @@ namespace Mobsticle.Logic.SettingsStore
 
         public void Save<T>(T settings)
         {
-            _persistence.Write(JsonConvert.SerializeObject(settings));
+            _persistence.Write(JsonConvert.SerializeObject(settings, Formatting.Indented));
         }
     }
 }

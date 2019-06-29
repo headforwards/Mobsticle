@@ -262,6 +262,14 @@ namespace Mobsticle.Tests.Logic.Mobsticle
             CollectionAssert.AreEqual(new[] { "B", "C" }, _mobsticle.Participants.Where(p => !p.IsDriving).Select(p => p.Name).ToList());
         }
 
+        [TestMethod]
+        public void SettingsSet_SetsSingleNextDriver()
+        {
+            _settings.Participants.Returns(new List<string> { "A" });
+            _mobsticle.Settings = _settings;
+            Assert.IsTrue(_mobsticle.Participants[0].Name == "A" && _mobsticle.Participants[0].IsDrivingNext == true);
+        }
+
         [TestInitialize]
         public void Setup()
         {
