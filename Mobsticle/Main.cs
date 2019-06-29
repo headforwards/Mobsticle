@@ -127,8 +127,9 @@ namespace Mobsticle
         private Icon[] createIcons(int size, int sections)
         {
             var icons = new List<Icon>();
-            using (var br = new SolidBrush(Color.IndianRed))
-            using (var bg = new SolidBrush(Color.PaleGreen))
+            using (var red = new SolidBrush(Color.IndianRed))
+            using (var green = new SolidBrush(Color.PaleGreen))
+            using (var white = new SolidBrush(Color.White))
             {
                 for (int i = 0; i <= _sections; i++)
                 {
@@ -139,11 +140,11 @@ namespace Mobsticle
                         float arc = (360f / sections) * i;
                         if (i < _sections)
                         {
-                            g.FillPie(bg, new Rectangle(0, 0, size - 1, size - 1), 270 + arc, 360 - arc);
+                            g.FillPie(green, new Rectangle(0, 0, size - 1, size - 1), 270 + arc, 360 - arc);
                         }
                         if (i > 0)
                         {
-                            g.FillPie(br, new Rectangle(0, 0, size - 1, size - 1), 270, arc);
+                            g.FillPie(red, new Rectangle(0, 0, size - 1, size - 1), 270, arc);
                         }
                         icons.Add(Icon.FromHandle(bitmap.GetHicon()));
                     }
@@ -153,11 +154,11 @@ namespace Mobsticle
                 using (var g = Graphics.FromImage(bitmap))
                 {
                     g.SmoothingMode = SmoothingMode.AntiAlias;
-                    g.FillEllipse(br, new Rectangle(0, 0, size - 1, size - 1));
+                    g.FillEllipse(red, new Rectangle(0, 0, size - 1, size - 1));
                     var o1 = (int)(size * 0.2);
                     var o2 = (int)(size * 0.6);
-                    g.FillRectangle(bg, new Rectangle(o1, o1, o1, o2));
-                    g.FillRectangle(bg, new Rectangle(o2, o1, o1, o2));
+                    g.FillRectangle(white, new Rectangle(o1, o1, o1, o2));
+                    g.FillRectangle(white, new Rectangle(o2, o1, o1, o2));
                     icons.Add(Icon.FromHandle(bitmap.GetHicon()));
                 }
             }
