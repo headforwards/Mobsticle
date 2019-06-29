@@ -129,40 +129,40 @@
             this.mniRotate,
             this.mniExit});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(181, 136);
+            this.contextMenuStrip.Size = new System.Drawing.Size(117, 114);
             // 
             // mniSettings
             // 
             this.mniSettings.Name = "mniSettings";
-            this.mniSettings.Size = new System.Drawing.Size(180, 22);
+            this.mniSettings.Size = new System.Drawing.Size(116, 22);
             this.mniSettings.Text = "Settings";
             this.mniSettings.Click += new System.EventHandler(this.mniSettings_Click);
             // 
             // mniStart
             // 
             this.mniStart.Name = "mniStart";
-            this.mniStart.Size = new System.Drawing.Size(180, 22);
+            this.mniStart.Size = new System.Drawing.Size(116, 22);
             this.mniStart.Text = "Start";
             this.mniStart.Click += new System.EventHandler(this.MniStart_Click);
             // 
             // mniPause
             // 
             this.mniPause.Name = "mniPause";
-            this.mniPause.Size = new System.Drawing.Size(180, 22);
+            this.mniPause.Size = new System.Drawing.Size(116, 22);
             this.mniPause.Text = "Pause";
             this.mniPause.Click += new System.EventHandler(this.mniPause_Click);
             // 
             // mniRotate
             // 
             this.mniRotate.Name = "mniRotate";
-            this.mniRotate.Size = new System.Drawing.Size(180, 22);
+            this.mniRotate.Size = new System.Drawing.Size(116, 22);
             this.mniRotate.Text = "Rotate";
             this.mniRotate.Click += new System.EventHandler(this.MniRotate_Click);
             // 
             // mniExit
             // 
             this.mniExit.Name = "mniExit";
-            this.mniExit.Size = new System.Drawing.Size(180, 22);
+            this.mniExit.Size = new System.Drawing.Size(116, 22);
             this.mniExit.Text = "Exit";
             this.mniExit.Click += new System.EventHandler(this.mniExit_Click);
             // 
@@ -174,12 +174,14 @@
             // 
             this.cboNotification.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.cboNotification.DisplayMember = "Key";
             this.cboNotification.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboNotification.FormattingEnabled = true;
             this.cboNotification.Location = new System.Drawing.Point(16, 252);
             this.cboNotification.Name = "cboNotification";
             this.cboNotification.Size = new System.Drawing.Size(211, 21);
             this.cboNotification.TabIndex = 4;
+            this.cboNotification.ValueMember = "Value";
             // 
             // label3
             // 
@@ -209,7 +211,7 @@
             this.Name = "Main";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Mobsticle";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);            
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.numMinutes)).EndInit();
             this.contextMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);

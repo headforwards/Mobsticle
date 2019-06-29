@@ -56,6 +56,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="UserInterface\Notification\INotificationSettings.cs" />
+    <Compile Include="UserInterface\Notification\ISoundNotifier.cs" />
+    <Compile Include="UserInterface\Notification\SoundNotifier.cs" />
     <Compile Include="Logic\SettingsStore\FilePersistence.cs" />
     <Compile Include="Logic\SettingsStore\IPersistence.cs" />
     <Compile Include="Logic\SettingsStore\ISettingsStore.cs" />
@@ -131,9 +134,7 @@
     <EmbeddedResource Include="Resources\Owl.wav" />
     <EmbeddedResource Include="Resources\Sheep.wav" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Logic\Notification\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

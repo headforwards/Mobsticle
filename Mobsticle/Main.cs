@@ -1,4 +1,5 @@
 ﻿using Mobsticle.Logic.Mobsticle;
+using Mobsticle.Logic.Notification;
 using Mobsticle.Logic.SettingsStore;
 using Mobsticle.Logic.Timer;
 using Mobsticle.UserInterface;
@@ -24,8 +25,6 @@ namespace Mobsticle
 
         private List<ToolStripItem> _participantMenuItems = new List<ToolStripItem>();
 
-        private SoundPlayer _player = new SoundPlayer();
-
         public Main()
         {
             InitializeComponent();
@@ -34,21 +33,14 @@ namespace Mobsticle
             notifyIcon.Icon = _icons16[0];
             notifyIcon.Visible = true;
             Icon = _icons48[0];
-            loadNotifications();
 
             var t = new MobsticleTimer();
             timer.Tick += t.OnTick;
             var mobsticle = new MobsticleLogic(t);
             var store = new Store(new FilePersistence());
-            var _interface = new MobsticleInterface(this, mobsticle, store);
+            var soundNotifier = new SoundNotifier();
+            var _interface = new MobsticleInterface(this, mobsticle, store, soundNotifier);
             MobsticleInterface = _interface;
-
-            var settings = store.Load<MobsticleSettings>();
-            var item = cboNotification.Items.Cast<object>().SingleOrDefault(x => ((KeyValuePair<string, string>)x).Value == settings.Notification);
-            if (item != null)
-            {
-                cboNotification.SelectedIndex = cboNotification.Items.IndexOf(item);
-            }
 
             timer.Start();
         }
@@ -69,7 +61,6 @@ namespace Mobsticle
 
         public IDictionary<string, string> Notifications
         {
-            get => cboNotification.Items.Cast<KeyValuePair<string, string>>().ToDictionary(x => x.Key, x => x.Value);
             set
             {
                 cboNotification.Items.Clear(); foreach (var kvp in value)
@@ -128,22 +119,8 @@ namespace Mobsticle
             notifyIcon.Text = text;
         }
 
-        public void StartNotification()
-        {
-            _player.PlayLooping();
-        }
-
-        public void StopNotification()
-        {
-            _player.Stop();
-        }
-
         private void btnClose_Click(object sender, EventArgs e)
         {
-            if (cboNotification.SelectedItem != null)
-            {
-                setNotification(((KeyValuePair<string, string>)cboNotification.SelectedItem).Value);
-            }
             MobsticleInterface.btnCloseClick();
         }
 
@@ -192,21 +169,6 @@ namespace Mobsticle
             MobsticleInterface.formClosing(sender, e);
         }
 
-        private void loadNotifications()
-        {
-            var list = new List<KeyValuePair<string, string>>();
-            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-            var prefix = assembly.GetName().Name + ".Resources.";
-            foreach (var wav in assembly.GetManifestResourceNames().Where(name => name.EndsWith(".wav")))
-            {
-                list.Add(new KeyValuePair<string, string>(wav.Substring(prefix.Length, wav.Length - (prefix.Length + 4)), wav));
-            }
-            list.Sort((i1, i2) => i1.Key.CompareTo(i2.Key));
-            cboNotification.Items.AddRange(list.Cast<object>().ToArray());
-            cboNotification.ValueMember = "Value";
-            cboNotification.DisplayMember = "Key";
-        }
-
         private void mniExit_Click(object sender, EventArgs e)
         {
             MobsticleInterface.menuClose();
@@ -224,7 +186,6 @@ namespace Mobsticle
 
         private void mniSettings_Click(object sender, EventArgs e)
         {
-            //Show();
             MobsticleInterface.btnSettingsClick();
         }
 
@@ -237,15 +198,6 @@ namespace Mobsticle
         {
             notifyIcon.Icon = _icons16[icon];
             Icon = _icons48[icon];
-        }
-
-        private void setNotification(string name)
-        {
-            if (name != null)
-            {
-                var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-                _player.Stream = assembly.GetManifestResourceStream(name);
-            }
         }
     }
 }

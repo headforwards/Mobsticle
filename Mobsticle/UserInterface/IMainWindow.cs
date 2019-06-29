@@ -11,7 +11,7 @@ namespace Mobsticle.UserInterface
         decimal Minutes { get; set; }
         MobsticleInterface MobsticleInterface { get; set; }
         string Notification { get; set; }
-        IDictionary<string, string> Notifications { get; set; }
+        IDictionary<string, string> Notifications { set; }
         string ParticipantsList { get; set; }
         int PauseIcon { get; }
         int TimerIcons { get; }
@@ -32,8 +32,8 @@ namespace Mobsticle.UserInterface
 
         void Show();
 
-        void StartNotification();
+        //void StartNotification();
 
-        void StopNotification();
+        //void StopNotification();
     }
 }

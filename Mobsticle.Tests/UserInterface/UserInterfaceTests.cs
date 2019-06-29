@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mobsticle.Logic.Mobsticle;
+using Mobsticle.Logic.Notification;
 using Mobsticle.Logic.SettingsStore;
 using Mobsticle.UserInterface;
 using NSubstitute;
@@ -15,6 +16,7 @@ namespace Mobsticle.Tests.UserInterface
     {
         private MobsticleInterface _interface;
         private IMainWindow _mainWindow;
+        private ISoundNotifier _soundNotifier;
         private IMobsticle _mobsticleLogic;
         private ISettingsStore _store;
 
@@ -23,7 +25,6 @@ namespace Mobsticle.Tests.UserInterface
         {
             _mainWindow.ParticipantsList.Returns("A\r\nB");
             _mainWindow.Minutes.Returns(5);
-            _mainWindow.Notifications.Returns(new Dictionary<string, string> { { "A", "A.wav" }, { "B", "B.wav" } });
             _mainWindow.Notification.Returns("A.wav");
 
             _interface.btnCloseClick();
@@ -32,6 +33,7 @@ namespace Mobsticle.Tests.UserInterface
             Expression<Predicate<MobsticleSettings>> checkSettings = s => s.Minutes == 5 && s.Participants[0] == "A" && s.Participants[1] == "B" && s.Participants.Count == 2
                 && s.Notification == "A.wav";
             _mobsticleLogic.Received().Settings = Arg.Is(checkSettings);
+            _soundNotifier.Received().Settings = Arg.Is(checkSettings);
             _store.Received().Save(Arg.Is(checkSettings));
         }
 
@@ -115,13 +117,16 @@ namespace Mobsticle.Tests.UserInterface
         public void LoadsSettingsOnConstruction()
         {
             _store.Load<MobsticleSettings>().Returns(new MobsticleSettings { Minutes = 7, Participants = new[] { "A", "B" }, Notification = "A.wav" });
+            var ndict = new Dictionary<string, string>();
+            _soundNotifier.Notifications.Returns(ndict);
 
-            var iface = new MobsticleInterface(_mainWindow, _mobsticleLogic, _store);
+            var iface = new MobsticleInterface(_mainWindow, _mobsticleLogic, _store, _soundNotifier);
 
             _mainWindow.Received().ParticipantsList = "A\r\nB";
             _mainWindow.Received().Minutes = 7;
-            _mainWindow.Received().Notification = "A.wav";
+            _soundNotifier.Received().Notification = "A.wav";
             _mobsticleLogic.Received().Settings = Arg.Is<IMobsticleSettings>(s => s.Minutes == 7 && s.Participants[0] == "A" && s.Participants[1] == "B" && s.Participants.Count == 2);
+            _mainWindow.Received().Notifications = ndict;
         }
 
         [TestMethod]
@@ -168,7 +173,7 @@ namespace Mobsticle.Tests.UserInterface
         [TestMethod]
         public void SetsUpOnConstruction()
         {
-            new MobsticleInterface(_mainWindow, _mobsticleLogic, _store);
+            new MobsticleInterface(_mainWindow, _mobsticleLogic, _store, _soundNotifier);
 
             _mainWindow.Received().btnRotateVisible = false;
             _mainWindow.Received().btnStartVisible = false;
@@ -179,10 +184,11 @@ namespace Mobsticle.Tests.UserInterface
         public void Setup()
         {
             _mainWindow = Substitute.For<IMainWindow>();
+            _soundNotifier = Substitute.For<ISoundNotifier>();
             _mobsticleLogic = Substitute.For<IMobsticle>();
             _store = Substitute.For<ISettingsStore>();
             _store.Load<MobsticleSettings>().Returns(new MobsticleSettings());
-            _interface = new MobsticleInterface(_mainWindow, _mobsticleLogic, _store);
+            _interface = new MobsticleInterface(_mainWindow, _mobsticleLogic, _store, _soundNotifier);
             _mainWindow.MobsticleInterface = _interface;
         }
 
@@ -193,7 +199,7 @@ namespace Mobsticle.Tests.UserInterface
 
             _mobsticleLogic.StatusChanged += Raise.Event();
 
-            _mainWindow.Received().StartNotification();
+            _soundNotifier.Received().StartNotification();
         }
 
         [TestMethod]
@@ -216,7 +222,7 @@ namespace Mobsticle.Tests.UserInterface
 
             _mobsticleLogic.StatusChanged += Raise.Event();
 
-            _mainWindow.Received().StopNotification();
+            _soundNotifier.Received().StopNotification();
             _mainWindow.Received().DisplayIcon((int)(24 * 0.5));
         }
 
@@ -224,7 +230,7 @@ namespace Mobsticle.Tests.UserInterface
         [DataRow(MobsticleStatus.Expired)]
         [DataRow(MobsticleStatus.Running)]
         [DataRow(MobsticleStatus.Paused)]
-        public void StatusChanged_StartsNotificationAndMakesButtonsVisible(MobsticleStatus status)
+        public void StatusChanged_MakesButtonsVisible(MobsticleStatus status)
         {
             _mobsticleLogic.Status.Returns(status);
 

@@ -1,4 +1,5 @@
 ﻿using Mobsticle.Logic.Mobsticle;
+using Mobsticle.Logic.Notification;
 using Mobsticle.Logic.SettingsStore;
 using System;
 using System.Collections.Generic;
@@ -14,13 +15,15 @@ namespace Mobsticle.UserInterface
         private const string NEXT = " (Next)";
 
         private IMainWindow _mainWindow;
+        private ISoundNotifier _soundNotifier;
         private IMobsticle _mobsticle;
         private bool _okClose;
         private ISettingsStore _store;
 
-        public MobsticleInterface(IMainWindow mainWindow, IMobsticle mobsticle, ISettingsStore store)
+        public MobsticleInterface(IMainWindow mainWindow, IMobsticle mobsticle, ISettingsStore store, ISoundNotifier soundNotifier)
         {
             _mainWindow = mainWindow;
+            _soundNotifier = soundNotifier;
             _mobsticle = mobsticle;
             _store = store;
 
@@ -32,7 +35,8 @@ namespace Mobsticle.UserInterface
             _mobsticle.Settings = settings;
             _mainWindow.ParticipantsList = string.Join(Environment.NewLine, settings.Participants ?? new string[] { });
             _mainWindow.Minutes = settings.Minutes;
-            _mainWindow.Notification = settings.Notification;
+            _mainWindow.Notifications = _soundNotifier.Notifications;
+            _soundNotifier.Notification = settings.Notification;
 
             _mainWindow.btnPauseVisible = true;
             _mainWindow.btnRotateVisible = false;
@@ -47,6 +51,7 @@ namespace Mobsticle.UserInterface
             settings.Minutes = (int)_mainWindow.Minutes;
             settings.Notification = _mainWindow.Notification;
             _mobsticle.Settings = settings;
+            _soundNotifier.Settings = settings;
             _store.Save(settings);
         }
 
@@ -117,7 +122,7 @@ namespace Mobsticle.UserInterface
             switch (_mobsticle.Status)
             {
                 case MobsticleStatus.Expired:
-                    _mainWindow.StartNotification();
+                    _soundNotifier.StartNotification();
                     _mainWindow.btnRotateVisible = true;
                     _mainWindow.btnPauseVisible = false;
                     _mainWindow.btnStartVisible = false;
@@ -131,7 +136,7 @@ namespace Mobsticle.UserInterface
                     break;
 
                 case MobsticleStatus.Running:
-                    _mainWindow.StopNotification();
+                    _soundNotifier.StopNotification();
                     _mainWindow.DisplayIcon((int)(_mainWindow.TimerIcons * _mobsticle.FractionElapsedTime));
                     _mainWindow.btnRotateVisible = false;
                     _mainWindow.btnPauseVisible = true;

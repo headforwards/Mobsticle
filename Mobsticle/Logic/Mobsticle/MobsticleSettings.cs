@@ -1,4 +1,5 @@
 ﻿using Mobsticle.Logic.Mobsticle;
+using Mobsticle.Logic.Notification;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Mobsticle.Logic.Mobsticle
 {
-    public class MobsticleSettings : IMobsticleSettings
+    public class MobsticleSettings : IMobsticleSettings, INotificationSettings
     {
         public int Minutes { get; set; } = 10;
 
