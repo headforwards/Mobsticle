@@ -1,5 +1,4 @@
-﻿using Mobsticle.Logic.Mobsticle;
-using Mobsticle.Logic.Notification;
+﻿using Mobsticle.UserInterface.Notification;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

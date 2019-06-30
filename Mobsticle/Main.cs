@@ -1,8 +1,8 @@
 ﻿using Mobsticle.Logic.Mobsticle;
-using Mobsticle.Logic.Notification;
 using Mobsticle.Logic.SettingsStore;
 using Mobsticle.Logic.Timer;
 using Mobsticle.UserInterface;
+using Mobsticle.UserInterface.Notification;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -212,6 +212,15 @@ namespace Mobsticle
         {
             if (e.Button == MouseButtons.Left)
                 MobsticleInterface.btnIconDoubleClick();
+        }
+
+        public void ShowBalloonNotification(string notification)
+        {
+            notifyIcon.ShowBalloonTip(0, "Mobsticle", notification, ToolTipIcon.Info);
+        }
+
+        public void HideBalloonNotification()
+        {
         }
     }
 }

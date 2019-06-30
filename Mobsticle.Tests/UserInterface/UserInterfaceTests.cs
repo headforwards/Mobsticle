@@ -1,8 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mobsticle.Logic.Mobsticle;
-using Mobsticle.Logic.Notification;
 using Mobsticle.Logic.SettingsStore;
 using Mobsticle.UserInterface;
+using Mobsticle.UserInterface.Notification;
 using NSubstitute;
 using System;
 using System.Collections.Generic;
@@ -299,6 +299,38 @@ namespace Mobsticle.Tests.UserInterface
 
             _mainWindow.Received().Show();
             _mobsticleLogic.Received().Pause();
+        }
+
+        [TestMethod]
+        public void StatusChanged_DisplaysBalloon()
+        {
+            _mobsticleLogic.Participants.Returns(new List<IParticipant> { new Participant { Name = "Brian", IsDrivingNext = true } });
+            _mobsticleLogic.Status.Returns(MobsticleStatus.Expired);
+
+            _mobsticleLogic.StatusChanged += Raise.Event();
+
+            _mainWindow.Received().ShowBalloonNotification("The timer has expired. Please give control to Brian.");
+        }
+
+        [TestMethod]
+        public void StatusChanged_DisplaysBalloonNoParticipants()
+        {
+            _mobsticleLogic.Participants.Returns(new List<IParticipant>());
+            _mobsticleLogic.Status.Returns(MobsticleStatus.Expired);
+
+            _mobsticleLogic.StatusChanged += Raise.Event();
+
+            _mainWindow.Received().ShowBalloonNotification("The timer has expired. Please give control to the next driver.");
+        }
+
+        [TestMethod]
+        public void StatusChanged_HidesBalloon()
+        {
+            _mobsticleLogic.Status.Returns(MobsticleStatus.Running);
+
+            _mobsticleLogic.StatusChanged += Raise.Event();
+
+            _mainWindow.Received().HideBalloonNotification();
         }
     }
 }

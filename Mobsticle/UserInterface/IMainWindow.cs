@@ -31,5 +31,9 @@ namespace Mobsticle.UserInterface
         void SetIconTooltip(string text);
 
         void Show();
+
+        void ShowBalloonNotification(string notification);
+
+        void HideBalloonNotification();
     }
 }

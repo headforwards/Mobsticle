@@ -1,6 +1,6 @@
 ﻿using Mobsticle.Logic.Mobsticle;
-using Mobsticle.Logic.Notification;
 using Mobsticle.Logic.SettingsStore;
+using Mobsticle.UserInterface.Notification;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -140,6 +140,7 @@ namespace Mobsticle.UserInterface
             {
                 case MobsticleStatus.Expired:
                     _soundNotifier.StartNotification();
+                    _mainWindow.ShowBalloonNotification($"The timer has expired. Please give control to {_mobsticle.Participants?.SingleOrDefault(x => x.IsDrivingNext)?.Name ?? "the next driver"}.");
                     _mainWindow.btnRotateVisible = true;
                     _mainWindow.btnPauseVisible = false;
                     _mainWindow.btnStartVisible = false;
@@ -154,6 +155,7 @@ namespace Mobsticle.UserInterface
 
                 case MobsticleStatus.Running:
                     _soundNotifier.StopNotification();
+                    _mainWindow.HideBalloonNotification();
                     _mainWindow.DisplayIcon((int)(_mainWindow.TimerIcons * _mobsticle.FractionElapsedTime));
                     _mainWindow.btnRotateVisible = false;
                     _mainWindow.btnPauseVisible = true;
