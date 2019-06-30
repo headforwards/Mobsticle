@@ -216,7 +216,7 @@ namespace Mobsticle
 
         public void ShowBalloonNotification(string notification)
         {
-            notifyIcon.ShowBalloonTip(0, "Mobsticle", notification, ToolTipIcon.Info);
+            notifyIcon.ShowBalloonTip(10000, "Mobsticle", notification, ToolTipIcon.Info);
         }
 
         public void HideBalloonNotification()
