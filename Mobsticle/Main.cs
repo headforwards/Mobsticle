@@ -129,6 +129,7 @@ namespace Mobsticle
             var icons = new List<Icon>();
             using (var red = new SolidBrush(Color.IndianRed))
             using (var green = new SolidBrush(Color.PaleGreen))
+            using (var blue = new SolidBrush(Color.RoyalBlue))
             using (var white = new SolidBrush(Color.White))
             {
                 for (int i = 0; i <= _sections; i++)
@@ -154,7 +155,7 @@ namespace Mobsticle
                 using (var g = Graphics.FromImage(bitmap))
                 {
                     g.SmoothingMode = SmoothingMode.AntiAlias;
-                    g.FillEllipse(red, new Rectangle(0, 0, size - 1, size - 1));
+                    g.FillEllipse(blue, new Rectangle(0, 0, size - 1, size - 1));
                     var o1 = (int)(size * 0.2);
                     var o2 = (int)(size * 0.6);
                     g.FillRectangle(white, new Rectangle(o1, o1, o1, o2));
