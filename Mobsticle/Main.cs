@@ -17,7 +17,7 @@ namespace Mobsticle
     public partial class Main : Form, IMainWindow
     {
         private const int _pausedIcon = _sections + 1;
-        private const int _sections = 60;
+        private const int _sections = 24;
 
         private Icon[] _icons16;
 
