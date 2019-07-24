@@ -19,6 +19,9 @@ namespace Mobsticle
         private const int _pausedIcon = _sections + 1;
         private const int _sections = 60;
 
+        private const int _balloonClickedTimeLimit = 20;
+        private long _balloonClickedTime;
+
         private Icon[] _icons16;
 
         private Icon[] _icons48;
@@ -204,7 +207,7 @@ namespace Mobsticle
 
         private void NotifyIcon_Click(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left)
+            if (e.Button == MouseButtons.Left && (DateTime.Now.AddMilliseconds(-_balloonClickedTimeLimit).Ticks > _balloonClickedTime))
                 MobsticleInterface.btnIconClick();
         }
 
@@ -221,6 +224,12 @@ namespace Mobsticle
 
         public void HideBalloonNotification()
         {
+        }
+
+        private void NotifyIcon_BalloonTipClicked(object sender, EventArgs e)
+        {
+            _balloonClickedTime = DateTime.Now.Ticks;
+            MobsticleInterface.btnIconClick();
         }
     }
 }
