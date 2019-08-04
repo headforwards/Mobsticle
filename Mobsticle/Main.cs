@@ -1,8 +1,8 @@
 ﻿using Mobsticle.Logic.Mobsticle;
-using Mobsticle.Logic.Notification;
 using Mobsticle.Logic.SettingsStore;
 using Mobsticle.Logic.Timer;
 using Mobsticle.UserInterface;
+using Mobsticle.UserInterface.Notification;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -18,6 +18,9 @@ namespace Mobsticle
     {
         private const int _pausedIcon = _sections + 1;
         private const int _sections = 24;
+
+        private const int _balloonClickedTimeLimit = 20;
+        private long _balloonClickedTime;
 
         private Icon[] _icons16;
 
@@ -204,7 +207,7 @@ namespace Mobsticle
 
         private void NotifyIcon_Click(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left)
+            if (e.Button == MouseButtons.Left && (DateTime.Now.AddMilliseconds(-_balloonClickedTimeLimit).Ticks > _balloonClickedTime))
                 MobsticleInterface.btnIconClick();
         }
 
@@ -212,6 +215,21 @@ namespace Mobsticle
         {
             if (e.Button == MouseButtons.Left)
                 MobsticleInterface.btnIconDoubleClick();
+        }
+
+        public void ShowBalloonNotification(string notification)
+        {
+            notifyIcon.ShowBalloonTip(10000, "Mobsticle", notification, ToolTipIcon.Info);
+        }
+
+        public void HideBalloonNotification()
+        {
+        }
+
+        private void NotifyIcon_BalloonTipClicked(object sender, EventArgs e)
+        {
+            _balloonClickedTime = DateTime.Now.Ticks;
+            MobsticleInterface.btnIconClick();
         }
     }
 }

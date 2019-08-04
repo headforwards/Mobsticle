@@ -5,7 +5,7 @@ using System.Media;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Mobsticle.Logic.Notification
+namespace Mobsticle.UserInterface.Notification
 {
     public class SoundNotifier : ISoundNotifier
     {
