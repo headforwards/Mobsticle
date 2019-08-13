@@ -270,6 +270,16 @@ namespace Mobsticle.Tests.Logic.Mobsticle
             Assert.IsTrue(_mobsticle.Participants[0].Name == "A" && _mobsticle.Participants[0].IsDrivingNext == true);
         }
 
+        [TestMethod]
+        public void SettingsSet_ReplacingDriverButNotNextLeavesOnlyOneNext()
+        {
+            _settings.Participants.Returns(new List<string> { "A", "B", "C" });
+            _mobsticle.Settings = _settings;
+            _settings.Participants.Returns(new List<string> { "Q", "C", "B" });
+            _mobsticle.Settings = _settings;
+            Assert.IsTrue(_mobsticle.Participants.Count(x => x.IsDrivingNext) == 1);
+        }
+
         [TestInitialize]
         public void Setup()
         {

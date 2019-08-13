@@ -191,15 +191,16 @@ namespace Mobsticle.Logic.Mobsticle
                     }
                 }
             }
-            if (!_participants.Any(x => x.IsDriving))
+            if (_participants.Count > 0)
             {
-                if (_participants.Count > 0)
+                if (!_participants.Any(x => x.IsDriving))
                 {
                     _participants[0].IsDriving = true;
-                    if (_participants.Count > 1)
-                        _participants[1].IsDrivingNext = true;
-                    else
-                        _participants[0].IsDrivingNext = true;
+                }
+                if (!_participants.Any(x => x.IsDrivingNext))
+                {
+                    var i = _participants.IndexOf(_participants.Single(x => x.IsDriving));
+                    _participants[i + 1 < _participants.Count ? i + 1 : 0].IsDrivingNext = true;
                 }
             }
             if (changed)
